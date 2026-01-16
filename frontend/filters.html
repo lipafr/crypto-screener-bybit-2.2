@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filters - Crypto Screener</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-6">
+        <!-- Header -->
+        <header class="mb-6">
+            <h1 class="text-3xl font-bold text-purple-400 mb-2">
+                🔍 Filters Management
+            </h1>
+            <p class="text-gray-400">Create and manage your monitoring filters</p>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav mb-6">
+            <ul class="nav-list">
+                <li><a href="/dashboard.html" class="nav-link">📊 Dashboard</a></li>
+                <li><a href="/filters.html" class="nav-link active">🔍 Filters</a></li>
+                <li><a href="/triggers.html" class="nav-link">📜 History</a></li>
+                <li><a href="/settings.html" class="nav-link">⚙️ Settings</a></li>
+                <li><a href="/docs" class="nav-link">📖 API Docs</a></li>
+            </ul>
+        </nav>
+
+        <!-- Actions Bar -->
+        <div class="flex flex-wrap gap-4 mb-6">
+            <button onclick="showCreateFilterModal()" class="btn btn-primary">
+                ➕ Create Filter
+            </button>
+            
+            <select id="filter-type" class="form-select max-w-xs" onchange="loadFilters()">
+                <option value="">All Types</option>
+                <option value="price_change">Price Change</option>
+                <option value="volume_spike">Volume Spike</option>
+            </select>
+            
+            <select id="filter-status" class="form-select max-w-xs" onchange="loadFilters()">
+                <option value="">All Status</option>
+                <option value="true">Enabled</option>
+                <option value="false">Disabled</option>
+            </select>
+        </div>
+
+        <!-- Filters List -->
+        <div id="filters-container"></div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/utils.js"></script>
+    <script>
+        let allFilters = [];
+
+        async function loadFilters() {
+            const container = document.getElementById('filters-container');
+            utils.showLoading(container);
+
+            try {
+                const typeFilter = document.getElementById('filter-type').value;
+                const statusFilter = document.getElementById('filter-status').value;
+
+                const params = {};
+                if (typeFilter) params.type = typeFilter;
+                if (statusFilter) params.enabled = statusFilter;
+
+                allFilters = await api.getFilters(params);
+                renderFilters(allFilters);
+            } catch (error) {
+                console.error('Error loading filters:', error);
+                utils.showError(container, error.message);
+            }
+        }
+
+        function renderFilters(filters) {
+            const container = document.getElementById('filters-container');
+
+            if (!filters || filters.length === 0) {
+                utils.showEmpty(container, 'No filters found. Create your first filter!');
+                return;
+            }
+
+            const html = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    ${filters.map(filter => renderFilterCard(filter)).join('')}
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function renderFilterCard(filter) {
+            const config = filter.config;
+            const typeIcon = utils.getFilterTypeIcon(filter.type);
+            const typeLabel = utils.getFilterTypeLabel(filter.type);
+            const marketBadge = utils.getMarketBadge(config.market);
+            const lastTrigger = filter.last_trigger 
+                ? utils.formatRelativeTime(filter.last_trigger)
+                : 'Never';
+
+            return `
+                <div class="card">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-2xl">${typeIcon}</span>
+                                <h3 class="text-lg font-bold">${filter.name}</h3>
+                            </div>
+                            <div class="flex gap-2 mb-2">
+                                <span class="badge badge-info">${typeLabel}</span>
+                                ${marketBadge}
+                            </div>
+                        </div>
+                        
+                        <label class="toggle">
+                            <input type="checkbox" 
+                                   ${filter.enabled ? 'checked' : ''} 
+                                   onchange="toggleFilter(${filter.id}, this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Filter Details -->
+                    <div class="text-sm space-y-2 mb-4 text-gray-400">
+                        ${renderFilterDetails(filter)}
+                    </div>
+
+                    <!-- Last Trigger -->
+                    <div class="text-sm text-gray-500 mb-4">
+                        Last triggered: <span class="text-gray-300">${lastTrigger}</span>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-2">
+                        <button onclick="editFilter(${filter.id})" 
+                                class="btn btn-secondary text-sm flex-1">
+                            ✏️ Edit
+                        </button>
+                        <button onclick="cloneFilter(${filter.id})" 
+                                class="btn btn-secondary text-sm flex-1">
+                            📋 Clone
+                        </button>
+                        <button onclick="deleteFilter(${filter.id})" 
+                                class="btn btn-danger text-sm flex-1">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderFilterDetails(filter) {
+            const config = filter.config;
+            
+            if (filter.type === 'price_change') {
+                return `
+                    <div>⏱️ Interval: <strong>${config.interval_minutes} min</strong></div>
+                    <div>📊 Min Change: <strong>${config.min_price_change_percent}%</strong></div>
+                    <div>🎯 Direction: <strong>${utils.getDirectionLabel(config.direction)}</strong></div>
+                    <div>💰 Volume 24h: <strong>${utils.formatVolume(config.min_volume_24h)}+</strong></div>
+                    ${config.exclude_coins?.length ? 
+                        `<div>🚫 Excluded: <strong>${config.exclude_coins.join(', ')}</strong></div>` 
+                        : ''}
+                `;
+            } else if (filter.type === 'volume_spike') {
+                return `
+                    <div>⏱️ Period: <strong>${config.short_period_minutes}m / ${config.base_period_minutes}m</strong></div>
+                    <div>🔥 Spike: <strong>${config.spike_coefficient}x</strong></div>
+                    ${config.min_price_change_percent ? 
+                        `<div>📊 Price Change: <strong>${config.min_price_change_percent}%+</strong></div>` 
+                        : ''}
+                    <div>💰 Volume 24h: <strong>${utils.formatVolume(config.min_volume_24h)}+</strong></div>
+                    ${config.exclude_coins?.length ? 
+                        `<div>🚫 Excluded: <strong>${config.exclude_coins.join(', ')}</strong></div>` 
+                        : ''}
+                `;
+            }
+            
+            return '';
+        }
+
+        async function toggleFilter(id, enabled) {
+            try {
+                await api.toggleFilter(id);
+                utils.showToast(`Filter ${enabled ? 'enabled' : 'disabled'}`, 'success');
+            } catch (error) {
+                utils.showToast('Failed to toggle filter', 'error');
+                loadFilters(); // Reload to reset toggle
+            }
+        }
+
+        async function deleteFilter(id) {
+            utils.confirm('Are you sure you want to delete this filter?', async () => {
+                try {
+                    await api.deleteFilter(id);
+                    utils.showToast('Filter deleted', 'success');
+                    loadFilters();
+                } catch (error) {
+                    utils.showToast('Failed to delete filter', 'error');
+                }
+            });
+        }
+
+        async function cloneFilter(id) {
+            try {
+                await api.cloneFilter(id);
+                utils.showToast('Filter cloned', 'success');
+                loadFilters();
+            } catch (error) {
+                utils.showToast('Failed to clone filter', 'error');
+            }
+        }
+
+        function editFilter(id) {
+            window.location.href = `/filter-edit.html?id=${id}`;
+        }
+
+        function showCreateFilterModal() {
+            window.location.href = '/filter-edit.html';
+        }
+
+        // Initial load
+        loadFilters();
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadFilters, 30000);
+    </script>
+</body>
+</html>

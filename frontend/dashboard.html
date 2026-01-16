@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Crypto Screener</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-6">
+        <!-- Header -->
+        <header class="mb-6">
+            <h1 class="text-3xl font-bold text-purple-400 mb-2">
+                🚀 Crypto Screener Dashboard
+            </h1>
+            <p class="text-gray-400">Real-time cryptocurrency monitoring</p>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav mb-6">
+            <ul class="nav-list">
+                <li><a href="/dashboard.html" class="nav-link active">📊 Dashboard</a></li>
+                <li><a href="/filters.html" class="nav-link">🔍 Filters</a></li>
+                <li><a href="/triggers.html" class="nav-link">📜 History</a></li>
+                <li><a href="/settings.html" class="nav-link">⚙️ Settings</a></li>
+                <li><a href="/docs" class="nav-link">📖 API Docs</a></li>
+            </ul>
+        </nav>
+
+        <!-- System Status -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="card stat-card">
+                <div class="stat-label">Engine Status</div>
+                <div class="stat-value" id="engine-status">
+                    <span class="text-gray-500">...</span>
+                </div>
+            </div>
+            
+            <div class="card stat-card">
+                <div class="stat-label">Active Filters</div>
+                <div class="stat-value text-purple-400" id="active-filters">0</div>
+            </div>
+            
+            <div class="card stat-card">
+                <div class="stat-label">Triggers Today</div>
+                <div class="stat-value text-green-400" id="triggers-today">0</div>
+            </div>
+            
+            <div class="card stat-card">
+                <div class="stat-label">Uptime</div>
+                <div class="stat-value text-blue-400" id="uptime">N/A</div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Triggers This Week -->
+            <div class="card">
+                <h2 class="text-xl font-bold mb-4">📈 Triggers This Week</h2>
+                <div id="week-chart" class="h-64 flex items-center justify-center text-gray-500">
+                    Loading...
+                </div>
+            </div>
+
+            <!-- Top Symbols -->
+            <div class="card">
+                <h2 class="text-xl font-bold mb-4">🏆 Top Symbols (This Month)</h2>
+                <div id="top-symbols"></div>
+            </div>
+        </div>
+
+        <!-- Recent Triggers -->
+        <div class="card">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">🔔 Recent Triggers</h2>
+                <a href="/triggers.html" class="text-purple-400 hover:underline">View All →</a>
+            </div>
+            <div id="recent-triggers"></div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/utils.js"></script>
+    <script>
+        // Auto-refresh every 10 seconds
+        let refreshInterval;
+
+        async function loadDashboard() {
+            try {
+                // Load system status
+                const status = await api.getStatus();
+                
+                // Update engine status
+                const engineStatus = document.getElementById('engine-status');
+                if (status.running) {
+                    engineStatus.innerHTML = '<span class="text-green-400">✅ Running</span>';
+                } else {
+                    engineStatus.innerHTML = '<span class="text-red-400">❌ Stopped</span>';
+                }
+                
+                // Update stats
+                document.getElementById('active-filters').textContent = status.active_filters || 0;
+                document.getElementById('uptime').textContent = utils.formatUptime(status.uptime_seconds);
+                
+                // Load trigger stats
+                const stats = await api.getTriggerStats();
+                document.getElementById('triggers-today').textContent = stats.total_today || 0;
+                
+                // Load top symbols
+                renderTopSymbols(stats.by_symbol || []);
+                
+                // Load top filters (for week chart simulation)
+                renderWeekChart(stats.by_filter || []);
+                
+                // Load recent triggers
+                const triggers = await api.getTriggers({ limit: 5 });
+                renderRecentTriggers(triggers.items || []);
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                utils.showToast('Failed to load dashboard data', 'error');
+            }
+        }
+
+        function renderTopSymbols(symbols) {
+            const container = document.getElementById('top-symbols');
+            
+            if (!symbols || symbols.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">No data yet</p>';
+                return;
+            }
+            
+            const html = symbols.slice(0, 10).map((item, index) => `
+                <div class="flex items-center justify-between py-2 border-b border-gray-700 last:border-0">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl font-bold text-gray-600">${index + 1}</span>
+                        <span class="font-mono font-bold">${item.symbol}</span>
+                    </div>
+                    <span class="badge badge-info">${item.count} triggers</span>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+        }
+
+        function renderWeekChart(filters) {
+            const container = document.getElementById('week-chart');
+            
+            if (!filters || filters.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No triggers this week</p>';
+                return;
+            }
+            
+            // Simple bar chart
+            const maxCount = Math.max(...filters.map(f => f.count));
+            
+            const html = filters.slice(0, 5).map(item => {
+                const width = (item.count / maxCount * 100).toFixed(0);
+                return `
+                    <div class="mb-3">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>${item.filter_name}</span>
+                            <span class="text-purple-400">${item.count}</span>
+                        </div>
+                        <div class="bg-gray-700 rounded-full h-3">
+                            <div class="bg-purple-500 h-3 rounded-full transition-all" 
+                                 style="width: ${width}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+
+        function renderRecentTriggers(triggers) {
+            const container = document.getElementById('recent-triggers');
+            
+            if (!triggers || triggers.length === 0) {
+                utils.showEmpty(container, 'No triggers yet');
+                return;
+            }
+            
+            const html = `
+                <div class="overflow-x-auto">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Filter</th>
+                                <th>Symbol</th>
+                                <th>Market</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${triggers.map(trigger => `
+                                <tr>
+                                    <td class="whitespace-nowrap">
+                                        ${utils.formatRelativeTime(trigger.triggered_at)}
+                                    </td>
+                                    <td>${trigger.filter_name}</td>
+                                    <td class="font-mono font-bold">${trigger.symbol}</td>
+                                    <td>${utils.getMarketBadge(trigger.market)}</td>
+                                    <td>
+                                        ${formatTriggerDetails(trigger.data)}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        function formatTriggerDetails(data) {
+            if (data.price_change_percent !== undefined) {
+                const color = data.price_change_percent > 0 ? 'text-green-400' : 'text-red-400';
+                return `<span class="${color}">${utils.formatPercent(data.price_change_percent)}</span>`;
+            }
+            if (data.spike_coefficient !== undefined) {
+                return `<span class="text-orange-400">${data.spike_coefficient.toFixed(1)}x spike</span>`;
+            }
+            return '-';
+        }
+
+        // Initial load
+        loadDashboard();
+
+        // Auto-refresh every 10 seconds
+        refreshInterval = setInterval(loadDashboard, 10000);
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,540 @@
+"""
+Screener Engine
+~~~~~~~~~~~~~~~
+
+CRITICAL: Main screening loop that orchestrates the entire system.
+
+WORKFLOW:
+1. Parse data from exchange (fetch tickers + candles)
+2. Wait 5 seconds
+3. Check all filters against parsed data
+4. Send notifications for triggers
+5. Sleep until next cycle
+
+KEY REQUIREMENTS:
+- Parse and Check are SEQUENTIAL (not parallel!)
+- Only parse markets that are needed by active filters
+- Respect cooldown between notifications
+- Automatic cleanup of old data
+"""
+
+import asyncio
+import logging
+from typing import Optional
+from datetime import datetime
+
+from .database import Database
+from .exchange import BybitExchange
+from .filters import FilterChecker
+from .notifications import TelegramNotifier
+from .time_utils import get_current_timestamp, format_timestamp
+
+logger = logging.getLogger(__name__)
+
+
+class ScreenerEngine:
+    """
+    Main screener engine.
+    
+    Coordinates all components:
+    - Exchange data fetching
+    - Database storage
+    - Filter checking
+    - Notifications
+    """
+    
+    def __init__(
+        self,
+        db: Database,
+        exchange: BybitExchange,
+        notifier: TelegramNotifier,
+        checker: FilterChecker,
+        check_interval: int = 300,
+        cooldown_minutes: int = 15
+    ):
+        """
+        Initialize screener engine.
+        
+        Args:
+            db: Database instance
+            exchange: Exchange instance
+            notifier: Telegram notifier
+            checker: Filter checker
+            check_interval: Seconds between checks (default: 300 = 5 min)
+            cooldown_minutes: Cooldown between notifications (default: 15)
+        """
+        self.db = db
+        self.exchange = exchange
+        self.notifier = notifier
+        self.checker = checker
+        self.check_interval = check_interval
+        self.cooldown_minutes = cooldown_minutes
+        
+        self.is_running = False
+        self.last_check_time: Optional[int] = None
+        self.start_time: Optional[int] = None
+        
+        logger.info(
+            f"✅ Screener engine initialized "
+            f"(interval={check_interval}s, cooldown={cooldown_minutes}m)"
+        )
+    
+    # ============================================
+    # Main Loop
+    # ============================================
+    
+    async def start(self) -> None:
+        """
+        Start screener engine (main loop).
+        
+        This is the main entry point that runs continuously.
+        """
+        if self.is_running:
+            logger.warning("Engine already running")
+            return
+        
+        self.is_running = True
+        self.start_time = get_current_timestamp()
+        
+        logger.info("🚀 Starting screener engine...")
+        
+        try:
+            while self.is_running:
+                cycle_start = get_current_timestamp()
+                
+                logger.info(
+                    f"{'='*60}\n"
+                    f"🔄 Starting cycle at {format_timestamp(cycle_start)}\n"
+                    f"{'='*60}"
+                )
+                
+                try:
+                    # ============================================
+                    # STEP 1: Parse data from exchange
+                    # ============================================
+                    logger.info("📥 STEP 1: Parsing data from exchange...")
+                    
+                    markets_to_parse = await self._get_markets_to_parse()
+                    
+                    if not markets_to_parse:
+                        logger.warning("⚠️  No active filters, skipping cycle")
+                        await asyncio.sleep(self.check_interval)
+                        continue
+                    
+                    await self._parse_market_data(markets_to_parse)
+                    
+                    # ============================================
+                    # STEP 2: Wait 5 seconds
+                    # ============================================
+                    logger.info("⏸️  STEP 2: Waiting 5 seconds...")
+                    await asyncio.sleep(5)
+                    
+                    # ============================================
+                    # STEP 3: Check all filters
+                    # ============================================
+                    logger.info("🔍 STEP 3: Checking filters...")
+                    
+                    await self._check_all_filters()
+                    
+                    # ============================================
+                    # STEP 4: Cleanup old data (every 15 minutes)
+                    # ============================================
+                    if cycle_start % 900 < self.check_interval:
+                        logger.info("🗑️  STEP 4: Cleaning up old data...")
+                        await self._cleanup_old_data()
+                    
+                    # ============================================
+                    # Update last check time
+                    # ============================================
+                    self.last_check_time = get_current_timestamp()
+                    
+                    cycle_duration = self.last_check_time - cycle_start
+                    
+                    logger.info(
+                        f"✅ Cycle completed in {cycle_duration}s\n"
+                        f"{'='*60}"
+                    )
+                    
+                except Exception as e:
+                    logger.error(
+                        f"❌ Error in cycle: {e}",
+                        exc_info=True
+                    )
+                
+                # ============================================
+                # Sleep until next cycle
+                # ============================================
+                logger.info(f"😴 Sleeping for {self.check_interval}s...")
+                await asyncio.sleep(self.check_interval)
+        
+        except asyncio.CancelledError:
+            logger.info("Engine cancelled")
+        
+        finally:
+            self.is_running = False
+            logger.info("Engine stopped")
+    
+    async def stop(self) -> None:
+        """Stop screener engine."""
+        logger.info("Stopping engine...")
+        self.is_running = False
+    
+    # ============================================
+    # Step 1: Parse Market Data
+    # ============================================
+    
+    async def _get_markets_to_parse(self) -> list[str]:
+        """
+        Determine which markets need to be parsed.
+        
+        Based on active filters, determine if we need spot, futures, or both.
+        
+        Returns:
+            List of markets to parse (['spot'] or ['futures'] or ['spot', 'futures'])
+        """
+        # Get all active filters
+        filters = await self.db.get_all_filters(enabled_only=True)
+        
+        if not filters:
+            return []
+        
+        # Check which markets are needed
+        markets = set()
+        
+        for f in filters:
+            config = f['config']
+            market = config.get('market')
+            if market:
+                markets.add(market)
+        
+        markets_list = list(markets)
+        
+        logger.info(f"📊 Markets to parse: {markets_list}")
+        
+        return markets_list
+    
+    async def _parse_market_data(self, markets: list[str]) -> None:
+        """
+        Parse data from exchange for specified markets.
+        
+        For each market:
+        1. Fetch all tickers
+        2. Save to database
+        3. Fetch candles for each symbol
+        4. Save to database
+        
+        Args:
+            markets: List of markets ('spot' and/or 'futures')
+        """
+        for market in markets:
+            logger.info(f"📊 Parsing {market} market...")
+            
+            try:
+                # ============================================
+                # Fetch tickers
+                # ============================================
+                tickers = await self.exchange.fetch_tickers(market)
+                
+                logger.info(f"   Fetched {len(tickers)} tickers")
+                
+                # Save tickers to database
+                for symbol, ticker_data in tickers.items():
+                    volume_24h = ticker_data.get('quoteVolume', 0)
+                    last_price = ticker_data.get('last', 0)
+                    
+                    if volume_24h and last_price:
+                        await self.db.save_ticker(
+                            symbol, market, volume_24h, last_price
+                        )
+                
+                # ============================================
+                # Fetch candles for each symbol
+                # ============================================
+                logger.info(f"   Fetching candles for {len(tickers)} symbols...")
+                
+                # Fetch candles with concurrency limit
+                tasks = []
+                semaphore = asyncio.Semaphore(10)  # Max 10 concurrent requests
+                
+                async def fetch_and_save_candles(symbol: str):
+                    async with semaphore:
+                        candles = await self.exchange.fetch_ohlcv(
+                            symbol, market, '1m', 120
+                        )
+                        
+                        if candles:
+                            await self.db.save_candles(symbol, market, candles)
+                
+                for symbol in tickers.keys():
+                    tasks.append(fetch_and_save_candles(symbol))
+                
+                # Wait for all to complete
+                await asyncio.gather(*tasks, return_exceptions=True)
+                
+                logger.info(f"   ✅ {market} market parsed successfully")
+                
+            except Exception as e:
+                logger.error(
+                    f"❌ Error parsing {market} market: {e}",
+                    exc_info=True
+                )
+    
+    # ============================================
+    # Step 3: Check Filters
+    # ============================================
+    
+    async def _check_all_filters(self) -> None:
+        """
+        Check all active filters against current data.
+        
+        For each filter:
+        1. Get all symbols for that market
+        2. For each symbol:
+           - Get candles from database
+           - Get ticker from database
+           - Check filter
+           - If triggered and cooldown passed:
+             - Save trigger to database
+             - Send notification
+        """
+        # Get all active filters
+        filters = await self.db.get_all_filters(enabled_only=True)
+        
+        if not filters:
+            logger.info("No active filters")
+            return
+        
+        logger.info(f"Checking {len(filters)} active filters...")
+        
+        total_triggers = 0
+        
+        for f in filters:
+            filter_id = f['id']
+            filter_name = f['name']
+            filter_type = f['type']
+            config = f['config']
+            market = config['market']
+            
+            logger.info(
+                f"🔍 Checking filter #{filter_id}: {filter_name} ({filter_type}, {market})"
+            )
+            
+            try:
+                # Determine interval needed
+                if filter_type == 'price_change':
+                    interval = config['interval_minutes']
+                else:  # volume_spike
+                    interval = config['base_period_minutes']
+                
+                # Get all symbols for this market from tickers
+                # (We only check symbols we have data for)
+                cursor = await self.db.db.execute("""
+                    SELECT DISTINCT symbol FROM tickers WHERE market = ?
+                """, (market,))
+                
+                rows = await cursor.fetchall()
+                symbols = [row['symbol'] for row in rows]
+                
+                logger.debug(f"   Checking {len(symbols)} symbols for {market}")
+                
+                # Check each symbol
+                for symbol in symbols:
+                    triggered = await self._check_symbol_for_filter(
+                        symbol, market, filter_id, filter_name,
+                        filter_type, config, interval
+                    )
+                    
+                    if triggered:
+                        total_triggers += 1
+                
+            except Exception as e:
+                logger.error(
+                    f"❌ Error checking filter #{filter_id}: {e}",
+                    exc_info=True
+                )
+        
+        logger.info(f"✅ Filter check complete. Triggers: {total_triggers}")
+    
+    async def _check_symbol_for_filter(
+        self,
+        symbol: str,
+        market: str,
+        filter_id: int,
+        filter_name: str,
+        filter_type: str,
+        config: dict,
+        interval_minutes: int
+    ) -> bool:
+        """
+        Check single symbol against filter.
+        
+        Returns:
+            True if triggered and notification sent
+        """
+        try:
+            # Get candles from database
+            candles = await self.db.get_candles(symbol, market, interval_minutes)
+            
+            if not candles:
+                return False
+            
+            # Get ticker from database
+            ticker = await self.db.get_ticker(symbol, market)
+            
+            if not ticker:
+                return False
+            
+            # Check filter
+            triggered, trigger_data = self.checker.check_filter(
+                filter_type, candles, ticker, config, symbol
+            )
+            
+            if not triggered:
+                return False
+            
+            # Check cooldown
+            can_notify = await self.db.check_cooldown(
+                filter_id, symbol, self.cooldown_minutes
+            )
+            
+            if not can_notify:
+                logger.debug(
+                    f"   ⏸️  {symbol}: Triggered but in cooldown"
+                )
+                return False
+            
+            # ============================================
+            # TRIGGERED! Save and notify
+            # ============================================
+            logger.info(
+                f"   🎯 TRIGGERED: {symbol} ({market}) - {filter_name}"
+            )
+            
+            # Get Bybit URL
+            url = self.exchange.get_bybit_url(symbol, market)
+            trigger_data['url'] = url
+            
+            # Save trigger to database
+            trigger_id = await self.db.save_trigger(
+                filter_id, filter_name, symbol, market,
+                trigger_data, notified=False
+            )
+            
+            # Send Telegram notification
+            success = await self.notifier.send_trigger_notification(
+                filter_name, filter_type, symbol, market,
+                trigger_data, url
+            )
+            
+            # Update notification status
+            if success:
+                await self.db.db.execute("""
+                    UPDATE filter_triggers SET notified = 1 WHERE id = ?
+                """, (trigger_id,))
+                await self.db.db.commit()
+            
+            return True
+            
+        except Exception as e:
+            logger.error(
+                f"❌ Error checking {symbol} for filter #{filter_id}: {e}",
+                exc_info=True
+            )
+            return False
+    
+    # ============================================
+    # Step 4: Cleanup
+    # ============================================
+    
+    async def _cleanup_old_data(self) -> None:
+        """Clean up old data from database."""
+        try:
+            # Cleanup old candles (>2 hours)
+            deleted_candles = await self.db.cleanup_old_candles(hours=2)
+            
+            # Cleanup old triggers (>30 days)
+            deleted_triggers = await self.db.cleanup_old_triggers(days=30)
+            
+            if deleted_candles or deleted_triggers:
+                logger.info(
+                    f"   Cleaned: {deleted_candles} candles, "
+                    f"{deleted_triggers} triggers"
+                )
+            
+        except Exception as e:
+            logger.error(f"❌ Error during cleanup: {e}", exc_info=True)
+    
+    # ============================================
+    # Status Methods
+    # ============================================
+    
+    def get_status(self) -> dict:
+        """
+        Get engine status.
+        
+        Returns:
+            Status dict with running state, last check time, etc.
+        """
+        uptime = None
+        if self.start_time:
+            uptime = get_current_timestamp() - self.start_time
+        
+        return {
+            'running': self.is_running,
+            'last_check': self.last_check_time,
+            'uptime_seconds': uptime,
+            'check_interval': self.check_interval,
+            'cooldown_minutes': self.cooldown_minutes
+        }
+
+
+# ============================================
+# Convenience Functions
+# ============================================
+
+def create_engine(
+    db: Database,
+    exchange: BybitExchange,
+    notifier: TelegramNotifier,
+    checker: FilterChecker,
+    check_interval: int = 300,
+    cooldown_minutes: int = 15
+) -> ScreenerEngine:
+    """
+    Create screener engine instance.
+    
+    Args:
+        db: Database instance
+        exchange: Exchange instance
+        notifier: Telegram notifier
+        checker: Filter checker
+        check_interval: Check interval in seconds
+        cooldown_minutes: Cooldown in minutes
+    
+    Returns:
+        ScreenerEngine instance
+    
+    Examples:
+        >>> engine = create_engine(db, exchange, notifier, checker)
+        >>> await engine.start()
+    """
+    return ScreenerEngine(
+        db, exchange, notifier, checker,
+        check_interval, cooldown_minutes
+    )
+
+
+if __name__ == "__main__":
+    import sys
+    
+    async def test_engine():
+        """Test engine (requires configuration)."""
+        print("=" * 50)
+        print("Screener Engine Test")
+        print("=" * 50)
+        print("\n⚠️  This requires full configuration (.env file)")
+        print("Run from main.py instead")
+        
+        return 1
+    
+    sys.exit(asyncio.run(test_engine()))

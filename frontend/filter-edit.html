@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Filter - Crypto Screener</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-6 max-w-4xl">
+        <!-- Header -->
+        <header class="mb-6">
+            <h1 class="text-3xl font-bold text-purple-400 mb-2" id="page-title">
+                ➕ Create Filter
+            </h1>
+            <p class="text-gray-400">Configure your monitoring filter</p>
+        </header>
+
+        <!-- Back Button -->
+        <div class="mb-6">
+            <a href="/filters.html" class="text-purple-400 hover:underline">
+                ← Back to Filters
+            </a>
+        </div>
+
+        <!-- Form -->
+        <form id="filter-form" class="card">
+            <!-- Filter Name -->
+            <div class="form-group">
+                <label class="form-label">
+                    Filter Name <span class="text-red-400">*</span>
+                </label>
+                <input type="text" 
+                       id="filter-name" 
+                       class="form-input" 
+                       placeholder="e.g. 5% Price Pump"
+                       required>
+            </div>
+
+            <!-- Filter Type -->
+            <div class="form-group">
+                <label class="form-label">
+                    Filter Type <span class="text-red-400">*</span>
+                </label>
+                <select id="filter-type" class="form-select" onchange="updateFormFields()" required>
+                    <option value="">Select type...</option>
+                    <option value="price_change">📈 Price Change</option>
+                    <option value="volume_spike">🔥 Volume Spike</option>
+                </select>
+            </div>
+
+            <!-- Market -->
+            <div class="form-group">
+                <label class="form-label">
+                    Market <span class="text-red-400">*</span>
+                </label>
+                <select id="market" class="form-select" required>
+                    <option value="spot">Spot</option>
+                    <option value="futures">Futures</option>
+                </select>
+            </div>
+
+            <hr class="my-6 border-gray-700">
+
+            <!-- Price Change Fields -->
+            <div id="price-change-fields" style="display: none;">
+                <h3 class="text-xl font-bold mb-4">📈 Price Change Settings</h3>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Time Interval (minutes) <span class="text-red-400">*</span>
+                    </label>
+                    <select id="pc-interval" class="form-select">
+                        <option value="5">5 minutes</option>
+                        <option value="10">10 minutes</option>
+                        <option value="15" selected>15 minutes</option>
+                        <option value="30">30 minutes</option>
+                        <option value="60">1 hour</option>
+                        <option value="120">2 hours</option>
+                        <option value="240">4 hours</option>
+                    </select>
+                    <small class="text-gray-500">Check price change over this period</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Minimum Price Change (%) <span class="text-red-400">*</span>
+                    </label>
+                    <input type="number" 
+                           id="pc-min-change" 
+                           class="form-input" 
+                           value="5"
+                           step="0.1"
+                           min="0.1"
+                           placeholder="5.0">
+                    <small class="text-gray-500">Trigger when price changes by at least this %</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Direction <span class="text-red-400">*</span>
+                    </label>
+                    <select id="pc-direction" class="form-select">
+                        <option value="up">📈 Up (pump)</option>
+                        <option value="down">📉 Down (dump)</option>
+                        <option value="any">↕️ Any direction</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Minimum Volume During Period (USD)
+                    </label>
+                    <input type="number" 
+                           id="pc-min-volume" 
+                           class="form-input" 
+                           value="10000"
+                           step="1000"
+                           placeholder="10000">
+                    <small class="text-gray-500">Ignore if volume during period is too low</small>
+                </div>
+            </div>
+
+            <!-- Volume Spike Fields -->
+            <div id="volume-spike-fields" style="display: none;">
+                <h3 class="text-xl font-bold mb-4">🔥 Volume Spike Settings</h3>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Short Period (minutes) <span class="text-red-400">*</span>
+                    </label>
+                    <select id="vs-short-period" class="form-select">
+                        <option value="5">5 minutes</option>
+                        <option value="10" selected>10 minutes</option>
+                        <option value="15">15 minutes</option>
+                        <option value="30">30 minutes</option>
+                    </select>
+                    <small class="text-gray-500">Current period to check</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Base Period (minutes) <span class="text-red-400">*</span>
+                    </label>
+                    <select id="vs-base-period" class="form-select">
+                        <option value="60">1 hour</option>
+                        <option value="120" selected>2 hours</option>
+                        <option value="240">4 hours</option>
+                    </select>
+                    <small class="text-gray-500">Historical period for average calculation</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Spike Coefficient (x) <span class="text-red-400">*</span>
+                    </label>
+                    <input type="number" 
+                           id="vs-spike-coef" 
+                           class="form-input" 
+                           value="5"
+                           step="0.5"
+                           min="1"
+                           placeholder="5.0">
+                    <small class="text-gray-500">Trigger when volume is X times higher than average</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Price Direction (optional)
+                    </label>
+                    <select id="vs-price-direction" class="form-select">
+                        <option value="all">↕️ All directions</option>
+                        <option value="up">📈 Up only</option>
+                        <option value="down">📉 Down only</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Minimum Price Change During Spike (%)
+                    </label>
+                    <input type="number" 
+                           id="vs-min-price-change" 
+                           class="form-input" 
+                           value="0"
+                           step="0.1"
+                           min="0"
+                           placeholder="2.0">
+                    <small class="text-gray-500">0 = no price filter, only volume matters</small>
+                </div>
+            </div>
+
+            <hr class="my-6 border-gray-700">
+
+            <!-- Common Volume Filters -->
+            <div id="common-fields">
+                <h3 class="text-xl font-bold mb-4">💰 Volume Filters</h3>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Minimum 24h Volume (USD) <span class="text-red-400">*</span>
+                    </label>
+                    <input type="number" 
+                           id="min-volume-24h" 
+                           class="form-input" 
+                           value="100000"
+                           step="10000"
+                           placeholder="100000">
+                    <small class="text-gray-500">Only monitor pairs with at least this 24h volume</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Maximum 24h Volume (USD)
+                    </label>
+                    <input type="number" 
+                           id="max-volume-24h" 
+                           class="form-input" 
+                           step="10000"
+                           placeholder="Leave empty for no limit">
+                    <small class="text-gray-500">Exclude high-volume pairs like BTC, ETH (optional)</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Exclude Coins
+                    </label>
+                    <input type="text" 
+                           id="exclude-coins" 
+                           class="form-input" 
+                           placeholder="BTCUSDT, ETHUSDT">
+                    <small class="text-gray-500">Comma-separated list of symbols to exclude</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Comment (optional)
+                    </label>
+                    <textarea id="comment" 
+                              class="form-textarea" 
+                              placeholder="Notes about this filter..."></textarea>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-3 mt-6">
+                <button type="submit" class="btn btn-primary flex-1">
+                    💾 Save Filter
+                </button>
+                <button type="button" onclick="saveAndEnable()" class="btn btn-success flex-1">
+                    ✅ Save & Enable
+                </button>
+                <a href="/filters.html" class="btn btn-secondary">
+                    ❌ Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/utils.js"></script>
+    <script>
+        let editingFilterId = null;
+        let shouldEnable = false;
+
+        // Check if editing
+        const urlParams = new URLSearchParams(window.location.search);
+        const filterId = urlParams.get('id');
+
+        if (filterId) {
+            editingFilterId = parseInt(filterId);
+            document.getElementById('page-title').textContent = '✏️ Edit Filter';
+            loadFilter(editingFilterId);
+        }
+
+        async function loadFilter(id) {
+            try {
+                const filter = await api.getFilter(id);
+                
+                // Fill form
+                document.getElementById('filter-name').value = filter.name;
+                document.getElementById('filter-type').value = filter.type;
+                document.getElementById('market').value = filter.config.market;
+                
+                updateFormFields();
+                
+                const config = filter.config;
+                
+                if (filter.type === 'price_change') {
+                    document.getElementById('pc-interval').value = config.interval_minutes;
+                    document.getElementById('pc-min-change').value = config.min_price_change_percent;
+                    document.getElementById('pc-direction').value = config.direction;
+                    document.getElementById('pc-min-volume').value = config.min_volume_period;
+                } else if (filter.type === 'volume_spike') {
+                    document.getElementById('vs-short-period').value = config.short_period_minutes;
+                    document.getElementById('vs-base-period').value = config.base_period_minutes;
+                    document.getElementById('vs-spike-coef').value = config.spike_coefficient;
+                    document.getElementById('vs-price-direction').value = config.price_direction || 'all';
+                    document.getElementById('vs-min-price-change').value = config.min_price_change_percent || 0;
+                }
+                
+                // Common fields
+                document.getElementById('min-volume-24h').value = config.min_volume_24h;
+                if (config.max_volume_24h) {
+                    document.getElementById('max-volume-24h').value = config.max_volume_24h;
+                }
+                if (config.exclude_coins) {
+                    document.getElementById('exclude-coins').value = config.exclude_coins.join(', ');
+                }
+                if (config.comment) {
+                    document.getElementById('comment').value = config.comment;
+                }
+                
+            } catch (error) {
+                utils.showToast('Failed to load filter', 'error');
+                window.location.href = '/filters.html';
+            }
+        }
+
+        function updateFormFields() {
+            const type = document.getElementById('filter-type').value;
+            
+            document.getElementById('price-change-fields').style.display = 
+                type === 'price_change' ? 'block' : 'none';
+            document.getElementById('volume-spike-fields').style.display = 
+                type === 'volume_spike' ? 'block' : 'none';
+            document.getElementById('common-fields').style.display = 
+                type ? 'block' : 'none';
+        }
+
+        async function saveAndEnable() {
+            shouldEnable = true;
+            document.getElementById('filter-form').requestSubmit();
+        }
+
+        document.getElementById('filter-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const type = document.getElementById('filter-type').value;
+            if (!type) {
+                utils.showToast('Please select filter type', 'error');
+                return;
+            }
+            
+            try {
+                const data = {
+                    name: document.getElementById('filter-name').value,
+                    type: type,
+                    enabled: shouldEnable,
+                    config: buildConfig(type)
+                };
+                
+                if (editingFilterId) {
+                    await api.updateFilter(editingFilterId, data);
+                    utils.showToast('Filter updated', 'success');
+                } else {
+                    await api.createFilter(data);
+                    utils.showToast('Filter created', 'success');
+                }
+                
+                setTimeout(() => {
+                    window.location.href = '/filters.html';
+                }, 1000);
+                
+            } catch (error) {
+                utils.showToast('Failed to save filter: ' + error.message, 'error');
+            }
+        });
+
+        function buildConfig(type) {
+            const config = {
+                market: document.getElementById('market').value,
+                min_volume_24h: parseFloat(document.getElementById('min-volume-24h').value),
+                max_volume_24h: document.getElementById('max-volume-24h').value 
+                    ? parseFloat(document.getElementById('max-volume-24h').value) 
+                    : null,
+                exclude_coins: document.getElementById('exclude-coins').value
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(s => s),
+                comment: document.getElementById('comment').value
+            };
+            
+            if (type === 'price_change') {
+                config.interval_minutes = parseInt(document.getElementById('pc-interval').value);
+                config.min_price_change_percent = parseFloat(document.getElementById('pc-min-change').value);
+                config.direction = document.getElementById('pc-direction').value;
+                config.min_volume_period = parseFloat(document.getElementById('pc-min-volume').value);
+            } else if (type === 'volume_spike') {
+                config.short_period_minutes = parseInt(document.getElementById('vs-short-period').value);
+                config.base_period_minutes = parseInt(document.getElementById('vs-base-period').value);
+                config.spike_coefficient = parseFloat(document.getElementById('vs-spike-coef').value);
+                config.price_direction = document.getElementById('vs-price-direction').value;
+                config.min_price_change_percent = parseFloat(document.getElementById('vs-min-price-change').value);
+            }
+            
+            return config;
+        }
+    </script>
+</body>
+</html>

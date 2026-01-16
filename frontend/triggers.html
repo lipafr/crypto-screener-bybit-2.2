@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triggers History - Crypto Screener</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-6">
+        <!-- Header -->
+        <header class="mb-6">
+            <h1 class="text-3xl font-bold text-purple-400 mb-2">
+                📜 Triggers History
+            </h1>
+            <p class="text-gray-400">View all filter trigger events</p>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav mb-6">
+            <ul class="nav-list">
+                <li><a href="/dashboard.html" class="nav-link">📊 Dashboard</a></li>
+                <li><a href="/filters.html" class="nav-link">🔍 Filters</a></li>
+                <li><a href="/triggers.html" class="nav-link active">📜 History</a></li>
+                <li><a href="/settings.html" class="nav-link">⚙️ Settings</a></li>
+                <li><a href="/docs" class="nav-link">📖 API Docs</a></li>
+            </ul>
+        </nav>
+
+        <!-- Filters -->
+        <div class="card mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="form-group mb-0">
+                    <label class="form-label">Filter</label>
+                    <select id="filter-filter" class="form-select">
+                        <option value="">All Filters</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-0">
+                    <label class="form-label">Symbol</label>
+                    <input type="text" 
+                           id="symbol-filter" 
+                           class="form-input" 
+                           placeholder="e.g. BTC/USDT">
+                </div>
+
+                <div class="form-group mb-0">
+                    <label class="form-label">Market</label>
+                    <select id="market-filter" class="form-select">
+                        <option value="">All Markets</option>
+                        <option value="spot">Spot</option>
+                        <option value="futures">Futures</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-0">
+                    <label class="form-label">&nbsp;</label>
+                    <button onclick="applyFilters()" class="btn btn-primary w-full">
+                        🔍 Apply Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Triggers Table -->
+        <div class="card">
+            <div id="triggers-container"></div>
+
+            <!-- Pagination -->
+            <div id="pagination" class="flex justify-between items-center mt-6"></div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/utils.js"></script>
+    <script>
+        let currentPage = 0;
+        const pageSize = 20;
+        let totalTriggers = 0;
+        let allFilters = [];
+
+        async function loadFilters() {
+            try {
+                allFilters = await api.getFilters();
+                
+                const select = document.getElementById('filter-filter');
+                allFilters.forEach(filter => {
+                    const option = document.createElement('option');
+                    option.value = filter.id;
+                    option.textContent = filter.name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading filters:', error);
+            }
+        }
+
+        async function loadTriggers() {
+            const container = document.getElementById('triggers-container');
+            utils.showLoading(container);
+
+            try {
+                const params = {
+                    limit: pageSize,
+                    offset: currentPage * pageSize
+                };
+
+                const filterFilter = document.getElementById('filter-filter').value;
+                const symbolFilter = document.getElementById('symbol-filter').value.trim();
+                const marketFilter = document.getElementById('market-filter').value;
+
+                if (filterFilter) params.filter_id = filterFilter;
+                if (symbolFilter) params.symbol = symbolFilter;
+                if (marketFilter) params.market = marketFilter;
+
+                const result = await api.getTriggers(params);
+                totalTriggers = result.total;
+
+                renderTriggers(result.items);
+                renderPagination();
+            } catch (error) {
+                console.error('Error loading triggers:', error);
+                utils.showError(container, error.message);
+            }
+        }
+
+        function renderTriggers(triggers) {
+            const container = document.getElementById('triggers-container');
+
+            if (!triggers || triggers.length === 0) {
+                utils.showEmpty(container, 'No triggers found');
+                return;
+            }
+
+            const html = `
+                <div class="overflow-x-auto">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Filter</th>
+                                <th>Symbol</th>
+                                <th>Market</th>
+                                <th>Details</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${triggers.map(trigger => `
+                                <tr>
+                                    <td class="whitespace-nowrap">
+                                        <div>${utils.formatTimestamp(trigger.triggered_at)}</div>
+                                        <div class="text-xs text-gray-500">
+                                            ${utils.formatRelativeTime(trigger.triggered_at)}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="font-medium">${trigger.filter_name}</div>
+                                    </td>
+                                    <td class="font-mono font-bold">${trigger.symbol}</td>
+                                    <td>${utils.getMarketBadge(trigger.market)}</td>
+                                    <td>${formatTriggerDetails(trigger.data)}</td>
+                                    <td>
+                                        <a href="${trigger.data.url}" 
+                                           target="_blank"
+                                           class="text-purple-400 hover:underline">
+                                            🔗 Trade
+                                        </a>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function formatTriggerDetails(data) {
+            const parts = [];
+
+            if (data.price_change_percent !== undefined) {
+                const color = data.price_change_percent > 0 ? 'text-green-400' : 'text-red-400';
+                parts.push(`<div class="${color}">📈 ${utils.formatPercent(data.price_change_percent)}</div>`);
+                parts.push(`<div class="text-sm text-gray-400">$${data.price_from?.toFixed(4)} → $${data.price_to?.toFixed(4)}</div>`);
+            }
+
+            if (data.spike_coefficient !== undefined) {
+                parts.push(`<div class="text-orange-400">🔥 ${data.spike_coefficient.toFixed(1)}x spike</div>`);
+                parts.push(`<div class="text-sm text-gray-400">Vol: ${utils.formatVolume(data.current_volume)}</div>`);
+            }
+
+            if (data.volume_24h !== undefined) {
+                parts.push(`<div class="text-sm text-gray-400">24h: ${utils.formatVolume(data.volume_24h)}</div>`);
+            }
+
+            return parts.join('');
+        }
+
+        function renderPagination() {
+            const container = document.getElementById('pagination');
+            const totalPages = Math.ceil(totalTriggers / pageSize);
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const html = `
+                <div class="text-gray-400">
+                    Showing ${currentPage * pageSize + 1}-${Math.min((currentPage + 1) * pageSize, totalTriggers)} 
+                    of ${totalTriggers}
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="prevPage()" 
+                            ${currentPage === 0 ? 'disabled' : ''}
+                            class="btn btn-secondary">
+                        ← Previous
+                    </button>
+                    <span class="flex items-center px-4 text-gray-400">
+                        Page ${currentPage + 1} of ${totalPages}
+                    </span>
+                    <button onclick="nextPage()" 
+                            ${currentPage >= totalPages - 1 ? 'disabled' : ''}
+                            class="btn btn-secondary">
+                        Next →
+                    </button>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                loadTriggers();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(totalTriggers / pageSize);
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                loadTriggers();
+            }
+        }
+
+        function applyFilters() {
+            currentPage = 0;
+            loadTriggers();
+        }
+
+        // Initial load
+        loadFilters();
+        loadTriggers();
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadTriggers, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Crypto Screener</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-6 max-w-4xl">
+        <!-- Header -->
+        <header class="mb-6">
+            <h1 class="text-3xl font-bold text-purple-400 mb-2">
+                ⚙️ Settings
+            </h1>
+            <p class="text-gray-400">Configure system parameters</p>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav mb-6">
+            <ul class="nav-list">
+                <li><a href="/dashboard.html" class="nav-link">📊 Dashboard</a></li>
+                <li><a href="/filters.html" class="nav-link">🔍 Filters</a></li>
+                <li><a href="/triggers.html" class="nav-link">📜 History</a></li>
+                <li><a href="/settings.html" class="nav-link active">⚙️ Settings</a></li>
+                <li><a href="/docs" class="nav-link">📖 API Docs</a></li>
+            </ul>
+        </nav>
+
+        <!-- System Settings -->
+        <div class="card mb-6">
+            <h2 class="text-2xl font-bold mb-4">🔧 System Settings</h2>
+
+            <form id="settings-form">
+                <div class="form-group">
+                    <label class="form-label">
+                        Check Interval (seconds)
+                    </label>
+                    <input type="number" 
+                           id="check-interval" 
+                           class="form-input" 
+                           min="60"
+                           max="3600"
+                           step="60"
+                           placeholder="300">
+                    <small class="text-gray-500">
+                        How often to check filters (60-3600 seconds). Default: 300 (5 minutes)
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Cooldown Period (minutes)
+                    </label>
+                    <input type="number" 
+                           id="cooldown" 
+                           class="form-input" 
+                           min="1"
+                           max="1440"
+                           placeholder="15">
+                    <small class="text-gray-500">
+                        Minimum time between notifications for same symbol (1-1440 minutes). Default: 15
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="parse-spot" class="mr-2">
+                        Parse Spot Market
+                    </label>
+                    <small class="text-gray-500 block mt-1">
+                        Enable monitoring of spot trading pairs
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="parse-futures" class="mr-2">
+                        Parse Futures Market
+                    </label>
+                    <small class="text-gray-500 block mt-1">
+                        Enable monitoring of futures trading pairs
+                    </small>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit" class="btn btn-primary">
+                        💾 Save Settings
+                    </button>
+                    <button type="button" onclick="loadSettings()" class="btn btn-secondary">
+                        🔄 Reset
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-4 p-4 bg-yellow-900 bg-opacity-20 border border-yellow-700 rounded-lg">
+                <p class="text-yellow-400 text-sm">
+                    ⚠️ <strong>Note:</strong> Settings changes apply immediately but won't persist after restart. 
+                    To save permanently, update the <code>.env</code> file and restart containers.
+                </p>
+            </div>
+        </div>
+
+        <!-- Telegram Settings -->
+        <div class="card mb-6">
+            <h2 class="text-2xl font-bold mb-4">📱 Telegram Notifications</h2>
+
+            <div class="mb-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-lg">Status:</span>
+                    <span id="telegram-status" class="badge badge-info">Checking...</span>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="p-4 bg-gray-700 rounded-lg">
+                    <h3 class="font-bold mb-2">📖 How to Configure Telegram:</h3>
+                    <ol class="list-decimal list-inside space-y-2 text-gray-300 text-sm">
+                        <li>Open Telegram and search for <code class="bg-gray-800 px-2 py-1 rounded">@BotFather</code></li>
+                        <li>Send <code class="bg-gray-800 px-2 py-1 rounded">/newbot</code> and follow instructions</li>
+                        <li>Copy your <strong>Bot Token</strong> (looks like: <code class="text-xs">123456:ABC-DEF...</code>)</li>
+                        <li>Send <code class="bg-gray-800 px-2 py-1 rounded">/start</code> to your new bot</li>
+                        <li>Open: <code class="text-xs">https://api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</code></li>
+                        <li>Find your <strong>Chat ID</strong> in the response</li>
+                        <li>Add both to <code>.env</code> file and restart</li>
+                    </ol>
+                </div>
+
+                <button onclick="testTelegram()" class="btn btn-success w-full">
+                    📨 Send Test Notification
+                </button>
+            </div>
+        </div>
+
+        <!-- System Information -->
+        <div class="card mb-6">
+            <h2 class="text-2xl font-bold mb-4">ℹ️ System Information</h2>
+
+            <div class="space-y-3" id="system-info">
+                <div class="flex justify-between py-2 border-b border-gray-700">
+                    <span class="text-gray-400">Engine Status:</span>
+                    <span id="info-engine" class="font-bold">...</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-gray-700">
+                    <span class="text-gray-400">Active Filters:</span>
+                    <span id="info-filters" class="font-bold">...</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-gray-700">
+                    <span class="text-gray-400">Last Check:</span>
+                    <span id="info-last-check" class="font-bold">...</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-gray-700">
+                    <span class="text-gray-400">Uptime:</span>
+                    <span id="info-uptime" class="font-bold">...</span>
+                </div>
+                <div class="flex justify-between py-2">
+                    <span class="text-gray-400">Version:</span>
+                    <span class="font-bold">v2.0.0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="card border-2 border-red-700">
+            <h2 class="text-2xl font-bold text-red-400 mb-4">⚠️ Danger Zone</h2>
+
+            <div class="space-y-4">
+                <div>
+                    <h3 class="font-bold mb-2">Database</h3>
+                    <p class="text-sm text-gray-400 mb-3">
+                        Clean up old trigger history (older than 30 days)
+                    </p>
+                    <button onclick="cleanupDatabase()" class="btn btn-danger">
+                        🗑️ Cleanup Database
+                    </button>
+                </div>
+
+                <hr class="border-gray-700">
+
+                <div>
+                    <h3 class="font-bold mb-2">Restart Required</h3>
+                    <p class="text-sm text-gray-400 mb-3">
+                        To restart the screener engine, use Docker:
+                    </p>
+                    <code class="block bg-gray-800 p-3 rounded text-sm">
+                        docker-compose restart backend
+                    </code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/utils.js"></script>
+    <script>
+        async function loadSettings() {
+            try {
+                const settings = await api.getSettings();
+
+                document.getElementById('check-interval').value = settings.check_interval_seconds;
+                document.getElementById('cooldown').value = settings.cooldown_minutes;
+                document.getElementById('parse-spot').checked = settings.parse_spot;
+                document.getElementById('parse-futures').checked = settings.parse_futures;
+
+                // Update Telegram status
+                const statusEl = document.getElementById('telegram-status');
+                if (settings.telegram_configured) {
+                    statusEl.className = 'badge badge-success';
+                    statusEl.textContent = '✅ Configured';
+                } else {
+                    statusEl.className = 'badge badge-warning';
+                    statusEl.textContent = '⚠️ Not Configured';
+                }
+            } catch (error) {
+                utils.showToast('Failed to load settings', 'error');
+            }
+        }
+
+        async function loadSystemInfo() {
+            try {
+                const status = await api.getStatus();
+
+                document.getElementById('info-engine').innerHTML = status.running 
+                    ? '<span class="text-green-400">✅ Running</span>'
+                    : '<span class="text-red-400">❌ Stopped</span>';
+
+                document.getElementById('info-filters').textContent = status.active_filters || 0;
+                
+                document.getElementById('info-last-check').textContent = status.last_check 
+                    ? utils.formatRelativeTime(status.last_check)
+                    : 'Never';
+
+                document.getElementById('info-uptime').textContent = 
+                    utils.formatUptime(status.uptime_seconds);
+            } catch (error) {
+                console.error('Failed to load system info:', error);
+            }
+        }
+
+        document.getElementById('settings-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            try {
+                const data = {
+                    check_interval_seconds: parseInt(document.getElementById('check-interval').value),
+                    cooldown_minutes: parseInt(document.getElementById('cooldown').value),
+                    parse_spot: document.getElementById('parse-spot').checked,
+                    parse_futures: document.getElementById('parse-futures').checked
+                };
+
+                await api.updateSettings(data);
+                utils.showToast('Settings saved successfully', 'success');
+            } catch (error) {
+                utils.showToast('Failed to save settings: ' + error.message, 'error');
+            }
+        });
+
+        async function testTelegram() {
+            const button = event.target;
+            button.disabled = true;
+            button.textContent = '📨 Sending...';
+
+            try {
+                await api.testTelegram();
+                utils.showToast('✅ Test message sent! Check your Telegram', 'success');
+            } catch (error) {
+                utils.showToast('❌ Failed: ' + error.message, 'error');
+            } finally {
+                button.disabled = false;
+                button.textContent = '📨 Send Test Notification';
+            }
+        }
+
+        function cleanupDatabase() {
+            utils.confirm(
+                'This will delete all trigger history older than 30 days. Continue?',
+                async () => {
+                    utils.showToast('Database cleanup feature coming soon...', 'info');
+                }
+            );
+        }
+
+        // Initial load
+        loadSettings();
+        loadSystemInfo();
+
+        // Auto-refresh system info every 10 seconds
+        setInterval(loadSystemInfo, 10000);
+    </script>
+</body>
+</html>
