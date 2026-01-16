@@ -1,6 +1,6 @@
 """
-FastAPI Main Application (WebSocket Version)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FastAPI Main Application (WebSocket Version) - WITH STATUS ENDPOINT
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Main entry point for WebSocket-based crypto screener.
 """
@@ -12,7 +12,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .screener.engine import start_screener
+from .screener.engine import start_screener, get_engine
 
 # Setup logging
 logging.basicConfig(
@@ -38,6 +38,12 @@ async def lifespan(app: FastAPI):
     logger.info("🚀 STARTING CRYPTO SCREENER API (WEBSOCKET MODE)")
     logger.info("=" * 70)
     
+    # Initialize database for API endpoints
+    from .screener.database import Database
+    app.state.db = Database(settings.db_path)
+    await app.state.db.connect()
+    logger.info("✅ API database connection initialized")
+    
     # Start screener engine in background
     import asyncio
     screener_task = asyncio.create_task(
@@ -48,15 +54,36 @@ async def lifespan(app: FastAPI):
         )
     )
     
+    # Store engine reference for API access
+    app.state.engine = None
+    app.state.notifier = None
+    
+    # Wait a bit for engine to initialize
+    await asyncio.sleep(2)
+    
+    # Get engine and notifier references
+    engine = get_engine()
+    if engine:
+        app.state.engine = engine
+        app.state.notifier = engine.notifier
+        logger.info("✅ Engine and notifier references stored in app.state")
+    
     try:
         yield
     finally:
         logger.info("🛑 Shutting down...")
+        
+        # Cancel screener task
         screener_task.cancel()
         try:
             await screener_task
         except asyncio.CancelledError:
             pass
+        
+        # Close database
+        if hasattr(app.state, 'db'):
+            await app.state.db.close()
+            logger.info("✅ API database connection closed")
 
 
 # ============================================
@@ -117,17 +144,41 @@ async def root():
 
 
 # ============================================
+# Status Endpoint (for frontend)
+# ============================================
+
+@app.get("/api/status")
+async def get_status():
+    """
+    Get system status.
+    
+    Returns:
+        System status information
+    """
+    engine = get_engine()
+    
+    return {
+        "status": "running" if engine and engine.running else "stopped",
+        "mode": "websocket",
+        "version": "2.0.0",
+        "running": engine.running if engine else False,
+        "active_filters": 0,  # TODO: Get from database
+        "last_check": None,  # TODO: Get from database
+    }
+
+
+# ============================================
 # Import and Include API Routers
 # ============================================
 
 # Import API routers
 from .api import filters, triggers, settings as settings_api, websocket
 
-# Include routers
-app.include_router(filters.router, prefix="/api", tags=["filters"])
-app.include_router(triggers.router, prefix="/api", tags=["triggers"])
-app.include_router(settings_api.router, prefix="/api", tags=["settings"])
-app.include_router(websocket.router, prefix="/ws", tags=["websocket"])
+# Include routers (routers already have their own prefixes!)
+app.include_router(filters.router)
+app.include_router(triggers.router)
+app.include_router(settings_api.router)
+app.include_router(websocket.router)
 
 
 logger.info("✅ API application initialized")

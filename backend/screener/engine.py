@@ -211,7 +211,7 @@ class ScreenerEngine:
             
             # Extract symbols from filter configurations
             for filter_data in filters:
-                market = filter_data.get('market', 'spot')
+                market = filter_data.get('config', {}).get('market', 'spot')
                 
                 # Get all symbols for this market from database
                 # (Assumes symbols are already in tickers table from previous runs)
@@ -244,15 +244,12 @@ class ScreenerEngine:
             List of symbols
         """
         try:
-            # Fetch tickers
-            if market == 'spot':
-                tickers = await self.exchange.fetch_tickers()
-            else:  # futures
-                # Set market type for futures
-                self.exchange.options['defaultType'] = 'swap'
-                tickers = await self.exchange.fetch_tickers()
-                # Reset back
-                self.exchange.options['defaultType'] = 'spot'
+            # Fetch tickers with market parameter
+            tickers = await self.exchange.fetch_tickers(market)
+            
+            if not tickers:
+                logger.warning(f"No tickers returned for {market}")
+                return []
             
             # Sort by quoteVolume
             sorted_symbols = sorted(
@@ -269,7 +266,7 @@ class ScreenerEngine:
             return top_symbols
             
         except Exception as e:
-            logger.error(f"Error getting top symbols: {e}")
+            logger.error(f"Error getting top symbols for {market}: {e}")
             return []
 
 

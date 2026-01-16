@@ -1,12 +1,15 @@
+"""
+Telegram Notifications - WITH TEST METHOD
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Formats and sends Telegram notifications.
+"""
+
+import logging
 from datetime import datetime, timezone
 from typing import Optional
 
 from telegram.error import TelegramError
-
-from backend.screener.coingecko import (
-    format_large_number,
-    format_time_ago,
-)
 
 
 class TelegramNotifier:
@@ -43,6 +46,29 @@ class TelegramNotifier:
             return False
 
     # ============================================================
+    # TEST METHOD (FOR API)
+    # ============================================================
+    async def send_test_message(self) -> bool:
+        """
+        Send test notification to verify Telegram configuration.
+        
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            message = (
+                "✅ <b>Test Notification</b>\n\n"
+                "Crypto Screener is working!\n"
+                f"🕐 {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC"
+            )
+            
+            return await self.send_message(message)
+            
+        except Exception as e:
+            self.logger.error(f"❌ Error sending test message: {e}", exc_info=True)
+            return False
+
+    # ============================================================
     # CoinGecko formatter
     # ============================================================
     def _format_coingecko_data(self, cg_data: dict) -> str:
@@ -53,76 +79,49 @@ class TelegramNotifier:
             lines = ["\n──────────────────────────────"]
             lines.append("📊 <b>CoinGecko Data:</b>")
 
+            # Market cap
             market_cap = cg_data.get("market_cap")
             market_cap_rank = cg_data.get("market_cap_rank")
 
             if market_cap and market_cap_rank:
+                from .coingecko import format_large_number
                 lines.append(
                     f"💎 Market Cap: {format_large_number(market_cap)} (#{market_cap_rank})"
                 )
 
-            mc_change = cg_data.get("market_cap_change_percentage_24h")
-            if mc_change is not None:
-                emoji = "📈" if mc_change > 0 else "📉"
-                lines.append(f"{emoji} 24h: {mc_change:+.2f}%")
+            # Volume 24h
+            volume_24h = cg_data.get("total_volume")
+            if volume_24h:
+                from .coingecko import format_large_number
+                lines.append(f"📊 Volume 24h: {format_large_number(volume_24h)}")
 
+            # Price changes
+            price_change_24h = cg_data.get("price_change_percentage_24h")
+            if price_change_24h is not None:
+                emoji = "📈" if price_change_24h > 0 else "📉"
+                lines.append(f"{emoji} 24h Change: {price_change_24h:+.2f}%")
+
+            # All-time high
             ath = cg_data.get("ath")
-            ath_change = cg_data.get("ath_change_percentage")
             ath_date = cg_data.get("ath_date")
-
-            if ath and ath_change is not None:
-                lines.append(f"🏔️ ATH: ${ath:.4f} ({ath_change:+.1f}%)")
-                if ath_date:
-                    ath_dt = datetime.fromtimestamp(ath_date, tz=timezone.utc)
-                    lines.append(f"📅 {ath_dt.strftime('%Y-%m-%d')}")
-
-            circulating = cg_data.get("circulating_supply")
-            max_supply = cg_data.get("max_supply")
-
-            if circulating:
-                supply = f"🪙 Supply: {format_large_number(circulating)}"
-                if max_supply:
-                    percent = (circulating / max_supply) * 100
-                    supply += f" / {format_large_number(max_supply)} ({percent:.1f}%)"
-                lines.append(supply)
-
-            volume = cg_data.get("total_volume_24h")
-            if volume and market_cap:
-                ratio = (volume / market_cap) * 100
-                emoji = "🔥" if ratio > 10 else "📊"
-                lines.append(f"{emoji} Volume/MCap: {ratio:.1f}%")
-
-            cg_price = cg_data.get("current_price")
             bybit_price = cg_data.get("bybit_price")
 
-            if cg_price and bybit_price:
-                diff = ((bybit_price - cg_price) / cg_price) * 100
-                if abs(diff) > 0.5:
-                    lines.append(
-                        f"ℹ️ Price diff: {diff:+.1f}% (CG: ${cg_price:.4f})"
-                    )
-
-            cached_at = cg_data.get("cached_at")
-            if cached_at:
-                age = int(datetime.now(timezone.utc).timestamp()) - cached_at
-                lines.append(f"🕐 Data: {format_time_ago(age)}")
-
-            coingecko_id = cg_data.get("coingecko_id")
-            if coingecko_id:
+            if ath and ath_date and bybit_price:
+                from .coingecko import format_time_ago
+                distance_from_ath = ((bybit_price - ath) / ath) * 100
                 lines.append(
-                    f"🔗 <a href='https://www.coingecko.com/en/coins/{coingecko_id}'>CoinGecko</a>"
+                    f"🔴 ATH: ${ath:.4f} ({format_time_ago(ath_date)})\n"
+                    f"     Distance: {distance_from_ath:+.2f}%"
                 )
 
             return "\n".join(lines)
 
         except Exception as e:
-            self.logger.error(
-                f"❌ Error formatting CoinGecko data: {e}", exc_info=True
-            )
+            self.logger.error(f"Error formatting CoinGecko data: {e}")
             return ""
 
     # ============================================================
-    # Price change message
+    # Filter notification formatters
     # ============================================================
     def _format_price_change_message(
         self,
@@ -133,50 +132,56 @@ class TelegramNotifier:
         url: str,
         cg_data: Optional[dict] = None,
     ) -> str:
-        price_change = data["price_change_percent"]
-        price_from = data["price_from"]
-        price_to = data["price_to"]
-        volume_period = data["volume_period"]
-        volume_24h = data["volume_24h"]
-
-        first_ts = data.get("first_candle_timestamp")
-        last_ts = data.get("last_candle_timestamp")
-
-        emoji = "🚀" if price_change > 0 else "📉"
+        """Format price change notification."""
+        market_emoji = "💰" if market == "spot" else "📈"
         market_name = "Spot" if market == "spot" else "Futures"
-        event_time = datetime.now(timezone.utc).strftime("%d.%m.%Y %H:%M:%S UTC")
 
-        message = f"""{emoji} Сработал фильтр: "{filter_name}"
-⏰ Время: {event_time}
+        price_change = data.get("price_change_percent", 0)
+        change_emoji = "🚀" if price_change > 0 else "📉"
 
-💰 Пара: {symbol}
-📊 Рынок: {market_name}
+        message = f"""
+🚨 <b>Filter Triggered!</b>
 
-📈 Изменение: {price_change:+.2f}%
-💵 Цена: ${price_from:.4f} → ${price_to:.4f}
-📦 Объём: ${volume_period:,.0f}
-📊 Объём 24ч: ${volume_24h:,.0f}"""
+📋 Filter: {filter_name}
+{market_emoji} Market: {market_name}
+💱 Pair: {symbol}
 
-        if first_ts and last_ts:
-            first_dt = datetime.fromtimestamp(first_ts, tz=timezone.utc)
-            last_dt = datetime.fromtimestamp(last_ts, tz=timezone.utc)
-            message += (
-                f"\n\n📊 Диапазон расчёта:"
-                f"\n🕐 Начало: {first_dt.strftime('%H:%M')} | ${price_from:.4f}"
-                f"\n🕐 Конец: {last_dt.strftime('%H:%M')} | ${price_to:.4f}"
-            )
+{change_emoji} <b>Price Change: {price_change:+.2f}%</b>
+
+💵 Price:
+   From: ${data.get('price_from', 0):.4f}
+   To: ${data.get('price_to', 0):.4f}
+
+📦 Period Volume: ${data.get('volume_period', 0):,.0f}
+📊 24h Volume: ${data.get('volume_24h', 0):,.0f}
+        """
+
+        # Add candle range if available
+        first_candle = data.get("first_candle_at")
+        last_candle = data.get("last_candle_at")
+
+        if first_candle and last_candle:
+            from datetime import datetime, timezone
+            first_dt = datetime.fromtimestamp(first_candle, tz=timezone.utc)
+            last_dt = datetime.fromtimestamp(last_candle, tz=timezone.utc)
+            price_from = data.get("price_from", 0)
+            price_to = data.get("price_to", 0)
+
+            if price_from and price_to:
+                message += (
+                    f"\n📊 Calculation Range:"
+                    f"\n🕐 Start: {first_dt.strftime('%H:%M')} | ${price_from:.4f}"
+                    f"\n🕐 End: {last_dt.strftime('%H:%M')} | ${price_to:.4f}"
+                )
 
         message += f"\n\n🔗 Bybit: {url}"
 
-        if cg_data:
-            cg_data["bybit_price"] = price_to
+        if cg_data and data.get('price_to'):
+            cg_data["bybit_price"] = data.get('price_to')
             message += self._format_coingecko_data(cg_data)
 
         return message
 
-    # ============================================================
-    # Volume spike message
-    # ============================================================
     def _format_volume_spike_message(
         self,
         filter_name: str,
@@ -186,48 +191,50 @@ class TelegramNotifier:
         url: str,
         cg_data: Optional[dict] = None,
     ) -> str:
-        spike = data["spike_coefficient"]
-        current = data["current_volume"]
-        avg = data["average_volume"]
-        volume_24h = data["volume_24h"]
-
-        price_change = data.get("price_change_percent")
-        price_from = data.get("price_from")
-        price_to = data.get("price_to")
-
-        first_ts = data.get("first_candle_timestamp")
-        last_ts = data.get("last_candle_timestamp")
-
+        """Format volume spike notification."""
+        market_emoji = "💰" if market == "spot" else "📈"
         market_name = "Spot" if market == "spot" else "Futures"
-        event_time = datetime.now(timezone.utc).strftime("%d.%m.%Y %H:%M:%S UTC")
 
-        message = f"""🔥 Сработал фильтр: "{filter_name}"
-⏰ Время: {event_time}
+        spike_percent = data.get("volume_spike_percent", 0)
 
-💰 Пара: {symbol}
-📊 Рынок: {market_name}
+        message = f"""
+🚨 <b>Filter Triggered!</b>
 
-📈 Всплеск объёма: {spike:.1f}x
-📦 Текущий объём: ${current:,.0f}
-📊 Средний объём: ${avg:,.0f}
-📊 Объём 24ч: ${volume_24h:,.0f}"""
+📋 Filter: {filter_name}
+{market_emoji} Market: {market_name}
+💱 Pair: {symbol}
 
-        if price_change is not None and price_from and price_to:
-            message += f"\n\n💵 Цена: ${price_from:.4f} → ${price_to:.4f} ({price_change:+.2f}%)"
+📊 <b>Volume Spike: {spike_percent:+.2f}%</b>
 
-            if first_ts and last_ts:
-                first_dt = datetime.fromtimestamp(first_ts, tz=timezone.utc)
-                last_dt = datetime.fromtimestamp(last_ts, tz=timezone.utc)
+📦 Period Volume: ${data.get('volume_period', 0):,.0f}
+📈 Average Volume: ${data.get('volume_avg', 0):,.0f}
+📊 24h Volume: ${data.get('volume_24h', 0):,.0f}
+
+💵 Current Price: ${data.get('price_to', 0):.4f}
+        """
+
+        # Add candle range if available
+        first_candle = data.get("first_candle_at")
+        last_candle = data.get("last_candle_at")
+
+        if first_candle and last_candle:
+            from datetime import datetime, timezone
+            first_dt = datetime.fromtimestamp(first_candle, tz=timezone.utc)
+            last_dt = datetime.fromtimestamp(last_candle, tz=timezone.utc)
+            price_from = data.get("price_from", 0)
+            price_to = data.get("price_to", 0)
+
+            if price_from and price_to:
                 message += (
-                    f"\n📊 Диапазон расчёта:"
-                    f"\n🕐 Начало: {first_dt.strftime('%H:%M')} | ${price_from:.4f}"
-                    f"\n🕐 Конец: {last_dt.strftime('%H:%M')} | ${price_to:.4f}"
+                    f"\n📊 Calculation Range:"
+                    f"\n🕐 Start: {first_dt.strftime('%H:%M')} | ${price_from:.4f}"
+                    f"\n🕐 End: {last_dt.strftime('%H:%M')} | ${price_to:.4f}"
                 )
 
         message += f"\n\n🔗 Bybit: {url}"
 
-        if cg_data and price_to:
-            cg_data["bybit_price"] = price_to
+        if cg_data and data.get('price_to'):
+            cg_data["bybit_price"] = data.get('price_to')
             message += self._format_coingecko_data(cg_data)
 
         return message
@@ -245,6 +252,21 @@ class TelegramNotifier:
         url: str,
         cg_data: Optional[dict] = None,
     ) -> bool:
+        """
+        Send filter trigger notification.
+        
+        Args:
+            filter_name: Name of the filter
+            filter_type: 'price_change' or 'volume_spike'
+            symbol: Trading pair
+            market: 'spot' or 'futures'
+            data: Trigger data dict
+            url: Bybit URL
+            cg_data: Optional CoinGecko data
+        
+        Returns:
+            True if successful, False otherwise
+        """
         try:
             if filter_type == "price_change":
                 message = self._format_price_change_message(
@@ -271,4 +293,5 @@ class TelegramNotifier:
 # Factory
 # ============================================================
 def create_notifier(bot, chat_id: str, logger) -> TelegramNotifier:
+    """Create TelegramNotifier instance."""
     return TelegramNotifier(bot=bot, chat_id=chat_id, logger=logger)
