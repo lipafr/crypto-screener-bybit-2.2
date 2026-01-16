@@ -22,12 +22,11 @@ KEY CHANGES FROM REST VERSION:
 import asyncio
 import logging
 import signal
-from typing import Optional
+from typing import Optional, Set, Dict
 
 from .websocket_manager import WebSocketManager, create_websocket_manager
 from .database import Database
 from .exchange import create_exchange
-from .notifications import TelegramNotifier
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +67,7 @@ class ScreenerEngine:
         self.database: Optional[Database] = None
         self.exchange = None
         self.ws_manager: Optional[WebSocketManager] = None
-        self.notifier: Optional[TelegramNotifier] = None
+        self.notifier = None
         
         # Running flag
         self.running = False
@@ -106,11 +105,20 @@ class ScreenerEngine:
             # 3. Initialize Telegram notifier
             logger.info("📱 Initializing Telegram notifier...")
             from ..config import settings
-            self.notifier = TelegramNotifier(
-                bot_token=settings.telegram_bot_token,
-                chat_id=settings.telegram_chat_id
+            from telegram import Bot
+            
+            # Create bot instance
+            bot = Bot(token=settings.telegram_bot_token)
+            
+            # Create notifier with bot object
+            from .notifications import create_notifier
+            self.notifier = create_notifier(
+                bot=bot,
+                chat_id=settings.telegram_chat_id,
+                logger=logger
             )
-            await self.notifier.start()
+            
+            logger.info("✅ Telegram notifier initialized")
             
             # 4. Get active symbols from filters
             logger.info("🔍 Loading active filters...")
@@ -127,6 +135,10 @@ class ScreenerEngine:
                     if symbols:
                         logger.info(f"✅ Found {len(symbols)} active symbols. Starting monitoring...")
                         break
+                
+                # If still no symbols after loop, return
+                if not symbols:
+                    return
             
             # 5. Create and start WebSocket manager
             logger.info(f"📡 Starting WebSocket manager for {len(symbols)} symbols...")
@@ -137,7 +149,7 @@ class ScreenerEngine:
             )
             
             # This will run until stopped
-            await self.ws_manager.start(symbols, markets)
+            await self.ws_manager.start(list(symbols), markets)
             
         except asyncio.CancelledError:
             logger.info("Engine cancelled")
@@ -150,87 +162,79 @@ class ScreenerEngine:
         """
         Stop the screener engine gracefully.
         """
+        if not self.running:
+            return
+        
         logger.info("🛑 Stopping screener engine...")
         
         self.running = False
         
-        # Stop components
+        # Stop WebSocket manager
         if self.ws_manager:
             await self.ws_manager.stop()
+            logger.info("✅ WebSocket manager stopped")
         
-        if self.notifier:
-            await self.notifier.stop()
-        
+        # Close exchange
         if self.exchange:
             await self.exchange.close()
+            logger.info("✅ Exchange connection closed")
         
+        # Close database
         if self.database:
             await self.database.close()
+            logger.info("✅ Database connection closed")
         
         logger.info("✅ Engine stopped")
     
     # ============================================
-    # Symbol Management
+    # Helper Methods
     # ============================================
     
-    async def _get_active_symbols(self) -> tuple[list, dict]:
+    async def _get_active_symbols(self) -> tuple[Set[str], Dict[str, str]]:
         """
-        Get list of symbols from active filters.
+        Get active symbols from enabled filters.
         
         Returns:
-            Tuple of (symbols_list, markets_dict)
-            - symbols_list: List of unique symbols
-            - markets_dict: Dict mapping symbol to market type
+            Tuple of (symbols_set, markets_dict)
+            - symbols_set: Set of unique symbols
+            - markets_dict: {symbol: market} mapping
         """
         try:
             # Get all active filters
-            filters_result = await self.database.execute(
-                """
-                SELECT DISTINCT market, config
-                FROM filters
-                WHERE enabled = 1
-                """
-            )
-            
-            filters = await filters_result.fetchall()
+            filters = await self.database.get_active_filters()
             
             if not filters:
-                return [], {}
+                return set(), {}
             
-            # Parse symbols from filter configs
-            import json
-            symbols_set = set()
+            symbols = set()
             markets = {}
             
-            for filter_row in filters:
-                market = filter_row['market']
-                config = json.loads(filter_row['config'])
+            # Extract symbols from filter configurations
+            for filter_data in filters:
+                market = filter_data.get('market', 'spot')
                 
-                # Get excluded symbols from config
-                excluded = set(config.get('excluded_symbols', []))
+                # Get all symbols for this market from database
+                # (Assumes symbols are already in tickers table from previous runs)
+                # For first run, we'll use top symbols by volume
+                market_symbols = await self._get_symbols_for_market(market, limit=100)
                 
-                # For now, we'll monitor all USDT pairs
-                # In production, you'd want to get this from tickers
-                # and apply volume filters
-                
-                # Placeholder: get top symbols by volume
-                # This should be implemented based on your requirements
-                pass
+                for symbol in market_symbols:
+                    symbols.add(symbol)
+                    markets[symbol] = market
             
-            # For demo: if no filters, return empty
-            # In production: fetch and filter symbols by volume
+            logger.info(
+                f"📊 Found {len(symbols)} unique symbols from {len(filters)} active filters"
+            )
             
-            logger.info(f"📊 Found {len(symbols_set)} unique symbols from active filters")
-            
-            return list(symbols_set), markets
+            return symbols, markets
             
         except Exception as e:
-            logger.error(f"Error getting active symbols: {e}")
-            return [], {}
+            logger.error(f"Error getting active symbols: {e}", exc_info=True)
+            return set(), {}
     
-    async def _get_top_symbols_by_volume(self, market: str, limit: int = 200) -> list:
+    async def _get_symbols_for_market(self, market: str, limit: int = 100) -> list:
         """
-        Get top symbols by 24h volume.
+        Get top symbols for market by volume.
         
         Args:
             market: 'spot' or 'futures'
@@ -241,7 +245,14 @@ class ScreenerEngine:
         """
         try:
             # Fetch tickers
-            tickers = await self.exchange.fetch_tickers(market)
+            if market == 'spot':
+                tickers = await self.exchange.fetch_tickers()
+            else:  # futures
+                # Set market type for futures
+                self.exchange.options['defaultType'] = 'swap'
+                tickers = await self.exchange.fetch_tickers()
+                # Reset back
+                self.exchange.options['defaultType'] = 'spot'
             
             # Sort by quoteVolume
             sorted_symbols = sorted(

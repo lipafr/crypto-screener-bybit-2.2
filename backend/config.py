@@ -1,75 +1,119 @@
-# 🔧 Инструкция: Добавить в config.py
+"""
+Configuration Module
+~~~~~~~~~~~~~~~~~~~
 
-## Откройте файл:
-```
-I:\crypto-screener-bybit-2.2\backend\config.py
-```
+Pydantic Settings for application configuration.
+Uses environment variables from .env file.
+"""
 
-## Добавьте эти строки в класс Settings:
-
-```python
-class Settings(BaseSettings):
-    # ... существующие настройки ...
-    
-    # ===== ДОБАВЬТЕ ЭТИ СТРОКИ =====
-    
-    # WebSocket settings
-    check_delay_seconds: int = Field(
-        default=10,
-        description="Delay after candle close before checking filters"
-    )
-    
-    # API settings
-    api_host: str = Field(default="0.0.0.0", description="API host")
-    api_port: int = Field(default=8000, description="API port")
-    
-    # Exchange settings
-    testnet: bool = Field(default=False, description="Use testnet")
-    
-    # ==================================
-```
-
-## Пример полного Settings (если нужно):
-
-```python
 from pydantic_settings import BaseSettings
 from pydantic import Field
 
+
 class Settings(BaseSettings):
-    """Application settings"""
+    """Application settings loaded from environment variables."""
     
-    # Telegram
-    telegram_bot_token: str
-    telegram_chat_id: str
+    # ============================================
+    # Telegram Settings
+    # ============================================
+    telegram_bot_token: str = Field(
+        description="Telegram bot token from @BotFather"
+    )
+    telegram_chat_id: str = Field(
+        description="Telegram chat ID to send notifications"
+    )
     
-    # Screener
-    check_interval_seconds: int = 300  # Для REST (не используется в WS)
-    check_delay_seconds: int = 10      # ← НОВОЕ! Для WebSocket
-    cooldown_minutes: int = 15
-    parse_spot: bool = True
-    parse_futures: bool = True
+    # ============================================
+    # Screener Settings
+    # ============================================
+    check_interval_seconds: int = Field(
+        default=300,
+        description="Interval between filter checks (seconds) - for REST mode"
+    )
     
-    # Database
-    db_path: str = "/data/screener.db"
+    check_delay_seconds: int = Field(
+        default=10,
+        description="Delay after candle close before checking filters - for WebSocket mode"
+    )
     
-    # Logging
-    log_level: str = "INFO"
-    log_path: str = "/logs/screener.log"
+    cooldown_minutes: int = Field(
+        default=15,
+        description="Cooldown between repeated notifications for same filter+symbol"
+    )
     
-    # API
-    api_host: str = "0.0.0.0"          # ← НОВОЕ!
-    api_port: int = 8000               # ← НОВОЕ!
+    parse_spot: bool = Field(
+        default=True,
+        description="Enable spot market parsing"
+    )
     
-    # Exchange
-    testnet: bool = False              # ← НОВОЕ!
-    request_timeout: int = 30000
-    max_retry_attempts: int = 3
-    retry_delay: float = 5.0
+    parse_futures: bool = Field(
+        default=True,
+        description="Enable futures market parsing"
+    )
+    
+    # ============================================
+    # Database Settings
+    # ============================================
+    db_path: str = Field(
+        default="/data/screener.db",
+        description="SQLite database file path"
+    )
+    
+    # ============================================
+    # Logging Settings
+    # ============================================
+    log_level: str = Field(
+        default="INFO",
+        description="Logging level (DEBUG, INFO, WARNING, ERROR)"
+    )
+    
+    log_path: str = Field(
+        default="/logs/screener.log",
+        description="Log file path"
+    )
+    
+    # ============================================
+    # API Settings
+    # ============================================
+    api_host: str = Field(
+        default="0.0.0.0",
+        description="API host to bind"
+    )
+    
+    api_port: int = Field(
+        default=8000,
+        description="API port"
+    )
+    
+    # ============================================
+    # Exchange Settings
+    # ============================================
+    testnet: bool = Field(
+        default=False,
+        description="Use Bybit testnet instead of mainnet"
+    )
+    
+    request_timeout: int = Field(
+        default=30000,
+        description="CCXT request timeout (milliseconds)"
+    )
+    
+    max_retry_attempts: int = Field(
+        default=3,
+        description="Maximum retry attempts for failed requests"
+    )
+    
+    retry_delay: float = Field(
+        default=5.0,
+        description="Delay between retry attempts (seconds)"
+    )
     
     class Config:
+        """Pydantic config."""
         env_file = ".env"
         env_file_encoding = "utf-8"
+        case_sensitive = False
 
+
+# Global settings instance
 settings = Settings()
-```
-

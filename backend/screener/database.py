@@ -21,7 +21,7 @@ KEY REQUIREMENTS:
 import aiosqlite
 import json
 import logging
-from typing import Optional, Any
+from typing import Optional, List, Dict, Any
 from pathlib import Path
 
 from .time_utils import (
@@ -87,6 +87,19 @@ class Database:
         if self.db:
             await self.db.close()
             logger.info("Database connection closed")
+    
+    async def execute(self, query: str, params: tuple = ()) -> aiosqlite.Cursor:
+        """
+        Execute SQL query.
+        
+        Args:
+            query: SQL query
+            params: Query parameters
+        
+        Returns:
+            Cursor object
+        """
+        return await self.db.execute(query, params)
     
     async def _create_schema(self) -> None:
         """
@@ -197,97 +210,104 @@ class Database:
     # Candles Operations
     # ============================================
     
+    async def save_candle(
+        self,
+        symbol: str,
+        market: str,
+        timestamp: int,
+        open_price: float,
+        high: float,
+        low: float,
+        close: float,
+        volume: float
+    ) -> bool:
+        """
+        Save single candle to database.
+        
+        Args:
+            symbol: Trading pair
+            market: 'spot' or 'futures'
+            timestamp: Candle timestamp (seconds)
+            open_price: Open price
+            high: High price
+            low: Low price
+            close: Close price
+            volume: Volume
+        
+        Returns:
+            True if saved successfully
+        """
+        try:
+            await self.db.execute("""
+                INSERT OR REPLACE INTO candles 
+                (symbol, market, timestamp, open, high, low, close, volume)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (symbol, market, timestamp, open_price, high, low, close, volume))
+            
+            await self.db.commit()
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Error saving candle: {e}", exc_info=True)
+            await self.db.rollback()
+            return False
+    
     async def save_candles(
         self,
         symbol: str,
         market: str,
-        candles: list[dict]
+        candles: List[Dict]
     ) -> int:
         """
-        Save candles to database (batch insert with conflict handling).
+        Save multiple candles (batch insert).
         
         Args:
-            symbol: Trading pair (e.g. 'BTC/USDT')
+            symbol: Trading pair
             market: 'spot' or 'futures'
             candles: List of candle dicts with keys: timestamp, open, high, low, close, volume
         
         Returns:
-            Number of candles inserted
-        
-        Examples:
-            >>> candles = [
-            ...     {
-            ...         'timestamp': 1704805440,
-            ...         'open': 142.5,
-            ...         'high': 143.2,
-            ...         'low': 142.1,
-            ...         'close': 142.9,
-            ...         'volume': 15000
-            ...     }
-            ... ]
-            >>> count = await db.save_candles('SOL/USDT', 'spot', candles)
+            Number of candles saved
         """
-        if not candles:
-            return 0
-        
         try:
-            inserted = 0
+            data = [
+                (symbol, market, c['timestamp'], c['open'], c['high'], c['low'], c['close'], c.get('volume', 0))
+                for c in candles
+            ]
             
-            for candle in candles:
-                # INSERT OR REPLACE to handle duplicates
-                await self.db.execute("""
-                    INSERT OR REPLACE INTO candles 
-                    (symbol, market, timestamp, open, high, low, close, volume)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    symbol,
-                    market,
-                    candle['timestamp'],
-                    candle['open'],
-                    candle['high'],
-                    candle['low'],
-                    candle['close'],
-                    candle['volume']
-                ))
-                inserted += 1
+            await self.db.executemany("""
+                INSERT OR REPLACE INTO candles 
+                (symbol, market, timestamp, open, high, low, close, volume)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, data)
             
             await self.db.commit()
             
-            logger.debug(
-                f"💾 Saved {inserted} candles for {symbol} ({market})"
-            )
+            logger.debug(f"✅ Saved {len(candles)} candles for {symbol} ({market})")
             
-            return inserted
+            return len(candles)
             
         except Exception as e:
-            logger.error(
-                f"❌ Error saving candles for {symbol} ({market}): {e}",
-                exc_info=True
-            )
+            logger.error(f"❌ Error saving candles: {e}", exc_info=True)
             await self.db.rollback()
-            raise
+            return 0
     
     async def get_candles(
         self,
         symbol: str,
         market: str,
         minutes: int
-    ) -> list[dict]:
+    ) -> List[Dict]:
         """
-        Get candles for symbol for last N minutes.
+        Get candles for last N minutes.
         
         Args:
             symbol: Trading pair
             market: 'spot' or 'futures'
-            minutes: Number of minutes to fetch
+            minutes: Number of minutes to retrieve
         
         Returns:
-            List of candle dicts, ordered by timestamp ASC
-        
-        Examples:
-            >>> candles = await db.get_candles('BTC/USDT', 'spot', 15)
-            >>> len(candles)
-            15
+            List of candle dicts (oldest first)
         """
         try:
             cutoff_time = get_timestamp_n_minutes_ago(minutes)
@@ -313,18 +333,10 @@ class Database:
                 for row in rows
             ]
             
-            logger.debug(
-                f"📊 Retrieved {len(candles)} candles for {symbol} ({market}), "
-                f"last {minutes} minutes"
-            )
-            
             return candles
             
         except Exception as e:
-            logger.error(
-                f"❌ Error getting candles for {symbol} ({market}): {e}",
-                exc_info=True
-            )
+            logger.error(f"❌ Error getting candles: {e}", exc_info=True)
             return []
     
     async def cleanup_old_candles(self, hours: int = 2) -> int:
@@ -368,58 +380,46 @@ class Database:
         market: str,
         volume_24h: float,
         last_price: float
-    ) -> None:
+    ) -> bool:
         """
         Save or update ticker data.
         
         Args:
             symbol: Trading pair
             market: 'spot' or 'futures'
-            volume_24h: 24h volume in USD
-            last_price: Last traded price
+            volume_24h: 24h quote volume
+            last_price: Last price
+        
+        Returns:
+            True if saved successfully
         """
         try:
+            current_time = get_current_timestamp()
+            
             await self.db.execute("""
                 INSERT OR REPLACE INTO tickers 
                 (symbol, market, volume_24h, last_price, updated_at)
                 VALUES (?, ?, ?, ?, ?)
-            """, (
-                symbol,
-                market,
-                volume_24h,
-                last_price,
-                get_current_timestamp()
-            ))
+            """, (symbol, market, volume_24h, last_price, current_time))
             
             await self.db.commit()
-            
-            logger.debug(
-                f"💾 Saved ticker for {symbol} ({market}): "
-                f"vol24h=${volume_24h:,.0f}, price=${last_price:.2f}"
-            )
+            return True
             
         except Exception as e:
-            logger.error(
-                f"❌ Error saving ticker for {symbol} ({market}): {e}",
-                exc_info=True
-            )
+            logger.error(f"❌ Error saving ticker: {e}", exc_info=True)
             await self.db.rollback()
-            raise
+            return False
     
-    async def get_ticker(
-        self,
-        symbol: str,
-        market: str
-    ) -> Optional[dict]:
+    async def get_ticker(self, symbol: str, market: str) -> Optional[Dict]:
         """
-        Get ticker data for symbol.
+        Get ticker data.
         
         Args:
             symbol: Trading pair
             market: 'spot' or 'futures'
         
         Returns:
-            Ticker dict or None if not found
+            Ticker dict or None
         """
         try:
             cursor = await self.db.execute("""
@@ -434,17 +434,42 @@ class Database:
                 return None
             
             return {
+                'symbol': symbol,
+                'market': market,
                 'volume_24h': row['volume_24h'],
                 'last_price': row['last_price'],
                 'updated_at': row['updated_at']
             }
             
         except Exception as e:
-            logger.error(
-                f"❌ Error getting ticker for {symbol} ({market}): {e}",
-                exc_info=True
-            )
+            logger.error(f"❌ Error getting ticker: {e}", exc_info=True)
             return None
+    
+    async def get_symbols_for_market(self, market: str) -> List[str]:
+        """
+        Get all symbols for market.
+        
+        Args:
+            market: 'spot' or 'futures'
+        
+        Returns:
+            List of symbols
+        """
+        try:
+            cursor = await self.db.execute("""
+                SELECT DISTINCT symbol
+                FROM tickers
+                WHERE market = ?
+                ORDER BY volume_24h DESC
+            """, (market,))
+            
+            rows = await cursor.fetchall()
+            
+            return [row['symbol'] for row in rows]
+            
+        except Exception as e:
+            logger.error(f"❌ Error getting symbols: {e}", exc_info=True)
+            return []
     
     # ============================================
     # Filters Operations
@@ -454,7 +479,7 @@ class Database:
         self,
         name: str,
         filter_type: str,
-        config: dict,
+        config: Dict,
         enabled: bool = True
     ) -> int:
         """
@@ -481,9 +506,7 @@ class Database:
             
             filter_id = cursor.lastrowid
             
-            logger.info(
-                f"✅ Created filter #{filter_id}: {name} ({filter_type})"
-            )
+            logger.info(f"✅ Created filter #{filter_id}: {name} ({filter_type})")
             
             return filter_id
             
@@ -492,7 +515,7 @@ class Database:
             await self.db.rollback()
             raise
     
-    async def get_filter(self, filter_id: int) -> Optional[dict]:
+    async def get_filter(self, filter_id: int) -> Optional[Dict]:
         """
         Get filter by ID.
         
@@ -528,10 +551,7 @@ class Database:
             logger.error(f"❌ Error getting filter {filter_id}: {e}", exc_info=True)
             return None
     
-    async def get_all_filters(
-        self,
-        enabled_only: bool = False
-    ) -> list[dict]:
+    async def get_all_filters(self, enabled_only: bool = False) -> List[Dict]:
         """
         Get all filters.
         
@@ -578,12 +598,23 @@ class Database:
             logger.error(f"❌ Error getting filters: {e}", exc_info=True)
             return []
     
+    async def get_active_filters(self) -> List[Dict]:
+        """
+        Get only enabled filters.
+        
+        This is a convenience method that calls get_all_filters(enabled_only=True).
+        
+        Returns:
+            List of enabled filter dicts
+        """
+        return await self.get_all_filters(enabled_only=True)
+    
     async def update_filter(
         self,
         filter_id: int,
         name: Optional[str] = None,
         enabled: Optional[bool] = None,
-        config: Optional[dict] = None
+        config: Optional[Dict] = None
     ) -> bool:
         """
         Update filter.
@@ -614,7 +645,7 @@ class Database:
                 params.append(json.dumps(config))
             
             if not updates:
-                return True  # Nothing to update
+                return True
             
             updates.append("updated_at = ?")
             params.append(get_current_timestamp())
@@ -623,7 +654,7 @@ class Database:
             
             query = f"UPDATE filters SET {', '.join(updates)} WHERE id = ?"
             
-            await self.db.execute(query, params)
+            await self.db.execute(query, tuple(params))
             await self.db.commit()
             
             logger.info(f"✅ Updated filter #{filter_id}")
@@ -631,7 +662,7 @@ class Database:
             return True
             
         except Exception as e:
-            logger.error(f"❌ Error updating filter {filter_id}: {e}", exc_info=True)
+            logger.error(f"❌ Error updating filter: {e}", exc_info=True)
             await self.db.rollback()
             return False
     
@@ -649,13 +680,41 @@ class Database:
             await self.db.execute("DELETE FROM filters WHERE id = ?", (filter_id,))
             await self.db.commit()
             
-            logger.info(f"🗑️  Deleted filter #{filter_id}")
+            logger.info(f"✅ Deleted filter #{filter_id}")
             
             return True
             
         except Exception as e:
-            logger.error(f"❌ Error deleting filter {filter_id}: {e}", exc_info=True)
+            logger.error(f"❌ Error deleting filter: {e}", exc_info=True)
             await self.db.rollback()
+            return False
+    
+    async def toggle_filter(self, filter_id: int) -> bool:
+        """
+        Toggle filter enabled status.
+        
+        Args:
+            filter_id: Filter ID
+        
+        Returns:
+            New enabled status
+        """
+        try:
+            # Get current status
+            filter_data = await self.get_filter(filter_id)
+            
+            if not filter_data:
+                return False
+            
+            new_status = not filter_data['enabled']
+            
+            # Update
+            await self.update_filter(filter_id, enabled=new_status)
+            
+            return new_status
+            
+        except Exception as e:
+            logger.error(f"❌ Error toggling filter: {e}", exc_info=True)
             return False
     
     # ============================================
@@ -668,105 +727,141 @@ class Database:
         filter_name: str,
         symbol: str,
         market: str,
-        data: dict,
-        notified: bool = False
+        data: Dict
     ) -> int:
         """
-        Save filter trigger event.
+        Save filter trigger.
         
         Args:
-            filter_id: Filter ID that triggered
-            filter_name: Filter name at trigger time
+            filter_id: Filter ID
+            filter_name: Filter name
             symbol: Trading pair
             market: 'spot' or 'futures'
-            data: Trigger data (price, volume, etc.)
-            notified: Whether notification was sent
+            data: Trigger data dict
         
         Returns:
             Trigger ID
         """
         try:
             data_json = json.dumps(data)
+            current_time = get_current_timestamp()
             
             cursor = await self.db.execute("""
                 INSERT INTO filter_triggers 
-                (filter_id, filter_name, symbol, market, data, notified)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (
-                filter_id,
-                filter_name,
-                symbol,
-                market,
-                data_json,
-                int(notified)
-            ))
+                (filter_id, filter_name, symbol, market, triggered_at, data, notified)
+                VALUES (?, ?, ?, ?, ?, ?, 1)
+            """, (filter_id, filter_name, symbol, market, current_time, data_json))
             
             await self.db.commit()
             
             trigger_id = cursor.lastrowid
             
-            logger.info(
-                f"🔔 Trigger #{trigger_id}: {filter_name} → {symbol} ({market})"
-            )
+            logger.info(f"✅ Saved trigger #{trigger_id}: {filter_name} → {symbol}")
             
             return trigger_id
             
         except Exception as e:
             logger.error(f"❌ Error saving trigger: {e}", exc_info=True)
             await self.db.rollback()
-            raise
+            return 0
     
-    async def get_last_trigger(
+    async def get_triggers(
         self,
-        filter_id: int,
-        symbol: str
-    ) -> Optional[dict]:
+        filter_id: Optional[int] = None,
+        symbol: Optional[str] = None,
+        market: Optional[str] = None,
+        limit: int = 100,
+        offset: int = 0
+    ) -> Dict[str, Any]:
         """
-        Get last trigger for filter and symbol.
+        Get triggers with filtering and pagination.
         
         Args:
-            filter_id: Filter ID
-            symbol: Trading pair
+            filter_id: Filter by filter ID
+            symbol: Filter by symbol
+            market: Filter by market
+            limit: Max results
+            offset: Skip first N results
         
         Returns:
-            Trigger dict or None
+            Dict with 'triggers' list and 'total' count
         """
         try:
-            cursor = await self.db.execute("""
-                SELECT id, triggered_at, data
+            # Build query
+            where_clauses = []
+            params = []
+            
+            if filter_id is not None:
+                where_clauses.append("filter_id = ?")
+                params.append(filter_id)
+            
+            if symbol:
+                where_clauses.append("symbol = ?")
+                params.append(symbol)
+            
+            if market:
+                where_clauses.append("market = ?")
+                params.append(market)
+            
+            where_sql = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
+            
+            # Get total count
+            count_cursor = await self.db.execute(
+                f"SELECT COUNT(*) as count FROM filter_triggers {where_sql}",
+                tuple(params)
+            )
+            count_row = await count_cursor.fetchone()
+            total = count_row['count']
+            
+            # Get triggers
+            params.extend([limit, offset])
+            
+            cursor = await self.db.execute(f"""
+                SELECT id, filter_id, filter_name, symbol, market, triggered_at, data, notified
                 FROM filter_triggers
-                WHERE filter_id = ? AND symbol = ?
+                {where_sql}
                 ORDER BY triggered_at DESC
-                LIMIT 1
-            """, (filter_id, symbol))
+                LIMIT ? OFFSET ?
+            """, tuple(params))
             
-            row = await cursor.fetchone()
+            rows = await cursor.fetchall()
             
-            if not row:
-                return None
+            triggers = []
+            for row in rows:
+                triggers.append({
+                    'id': row['id'],
+                    'filter_id': row['filter_id'],
+                    'filter_name': row['filter_name'],
+                    'symbol': row['symbol'],
+                    'market': row['market'],
+                    'triggered_at': row['triggered_at'],
+                    'data': json.loads(row['data']),
+                    'notified': bool(row['notified'])
+                })
             
             return {
-                'id': row['id'],
-                'triggered_at': row['triggered_at'],
-                'data': json.loads(row['data'])
+                'triggers': triggers,
+                'total': total
             }
             
         except Exception as e:
-            logger.error(f"❌ Error getting last trigger: {e}", exc_info=True)
-            return None
+            logger.error(f"❌ Error getting triggers: {e}", exc_info=True)
+            return {'triggers': [], 'total': 0}
     
     async def check_cooldown(
         self,
         filter_id: int,
         symbol: str,
+        market: str,
         cooldown_minutes: int
     ) -> bool:
         """
-        Check if cooldown period has passed since last trigger.
+        Check if filter can trigger again (cooldown check).
         
         Args:
             filter_id: Filter ID
             symbol: Trading pair
+            market: 'spot' or 'futures'
             cooldown_minutes: Cooldown period in minutes
         
         Returns:
@@ -779,9 +874,10 @@ class Database:
                 SELECT COUNT(*) as count
                 FROM filter_triggers
                 WHERE filter_id = ? 
-                  AND symbol = ? 
+                  AND symbol = ?
+                  AND market = ?
                   AND triggered_at > ?
-            """, (filter_id, symbol, cutoff_time))
+            """, (filter_id, symbol, market, cutoff_time))
             
             row = await cursor.fetchone()
             count = row['count']
@@ -789,9 +885,7 @@ class Database:
             can_trigger = (count == 0)
             
             if not can_trigger:
-                logger.debug(
-                    f"⏸️  Cooldown active for filter #{filter_id} → {symbol}"
-                )
+                logger.debug(f"⏸️  Cooldown active for filter #{filter_id} → {symbol}")
             
             return can_trigger
             
@@ -844,72 +938,7 @@ async def get_database(db_path: str = "/data/screener.db") -> Database:
     
     Returns:
         Connected Database instance
-    
-    Examples:
-        >>> db = await get_database()
-        >>> filters = await db.get_all_filters()
     """
     db = Database(db_path)
     await db.connect()
     return db
-
-
-if __name__ == "__main__":
-    import asyncio
-    
-    async def test_database():
-        """Test database operations."""
-        print("=" * 50)
-        print("Database Test")
-        print("=" * 50)
-        
-        # Create database
-        db = Database("/tmp/test_screener.db")
-        await db.connect()
-        
-        # Test candles
-        test_candles = [
-            {
-                'timestamp': get_current_timestamp() - 120,
-                'open': 100.0,
-                'high': 101.0,
-                'low': 99.0,
-                'close': 100.5,
-                'volume': 10000
-            }
-        ]
-        
-        await db.save_candles("BTC/USDT", "spot", test_candles)
-        candles = await db.get_candles("BTC/USDT", "spot", 5)
-        print(f"\n✅ Candles test: {len(candles)} candles")
-        
-        # Test ticker
-        await db.save_ticker("BTC/USDT", "spot", 1000000, 42000)
-        ticker = await db.get_ticker("BTC/USDT", "spot")
-        print(f"✅ Ticker test: ${ticker['volume_24h']:,.0f}")
-        
-        # Test filter
-        config = {
-            'market': 'spot',
-            'interval_minutes': 15,
-            'min_price_change_percent': 5.0
-        }
-        filter_id = await db.create_filter("Test Filter", "price_change", config)
-        print(f"✅ Filter test: #{filter_id}")
-        
-        # Test trigger
-        trigger_data = {'price_change_percent': 7.5}
-        trigger_id = await db.save_trigger(
-            filter_id, "Test Filter", "BTC/USDT", "spot", trigger_data
-        )
-        print(f"✅ Trigger test: #{trigger_id}")
-        
-        # Check cooldown
-        can_trigger = await db.check_cooldown(filter_id, "BTC/USDT", 15)
-        print(f"✅ Cooldown test: {can_trigger}")
-        
-        await db.close()
-        print("\n" + "=" * 50)
-        print("All tests passed! ✅")
-    
-    asyncio.run(test_database())
