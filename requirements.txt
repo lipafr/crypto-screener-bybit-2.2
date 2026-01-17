@@ -27,3 +27,7 @@ aiofiles==23.2.1
 
 # For production (optional)
 # gunicorn==21.2.0
+
+# В файле backend/requirements.txt изменить:
+aiohttp==3.9.5  # Совместима с ccxt
+aiodns==3.1.1

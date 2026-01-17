@@ -1,0 +1,300 @@
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,381 - backend.screener.exchange - ERROR - Error watching ticker A/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,381 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for A/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,382 - backend.screener.exchange - ERROR - Error watching ticker SOL/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,382 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for SOL/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,382 - backend.screener.exchange - ERROR - Error watching ticker IP/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,382 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for IP/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,382 - backend.screener.exchange - ERROR - Error watching ticker XMR/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,382 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for XMR/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,382 - backend.screener.exchange - ERROR - Error watching ticker ZEC/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,382 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ZEC/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,382 - backend.screener.exchange - ERROR - Error watching ticker AVNT/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,382 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for AVNT/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,383 - backend.screener.exchange - ERROR - Error watching ticker ARB/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,383 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ARB/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,383 - backend.screener.exchange - ERROR - Error watching ticker ICP/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,383 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ICP/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,383 - backend.screener.exchange - ERROR - Error watching ticker AAVE/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,383 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for AAVE/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,383 - backend.screener.exchange - ERROR - Error watching ticker XAUT/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,383 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for XAUT/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,383 - backend.screener.exchange - ERROR - Error watching ticker ETC/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,384 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ETC/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,384 - backend.screener.exchange - ERROR - Error watching ticker DUSK/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,384 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for DUSK/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,384 - backend.screener.exchange - ERROR - Error watching ticker ATOM/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,384 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ATOM/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,384 - backend.screener.exchange - ERROR - Error watching ticker SHIB1000/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,384 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for SHIB1000/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,384 - backend.screener.exchange - ERROR - Error watching ticker BNB/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,384 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for BNB/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,384 - backend.screener.exchange - ERROR - Error watching ticker ORDI/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,384 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ORDI/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,384 - backend.screener.exchange - ERROR - Error watching ticker TRX/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,385 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for TRX/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,385 - backend.screener.exchange - ERROR - Error watching ticker ETH/USDC:USDC (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,385 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ETH/USDC:USDC. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,385 - backend.screener.exchange - ERROR - Error watching ticker KAITO/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,385 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for KAITO/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,385 - backend.screener.exchange - ERROR - Error watching ticker 1000BONK/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,385 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for 1000BONK/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,385 - backend.screener.exchange - ERROR - Error watching ticker MNT/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,385 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for MNT/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,386 - backend.screener.exchange - ERROR - Error watching ticker RENDER/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,386 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for RENDER/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,386 - backend.screener.exchange - ERROR - Error watching ticker DOLO/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,386 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for DOLO/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,386 - backend.screener.exchange - ERROR - Error watching ticker STABLE/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,386 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for STABLE/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,386 - backend.screener.exchange - ERROR - Error watching ticker TAO/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,387 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for TAO/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,387 - backend.screener.exchange - ERROR - Error watching ticker ZEN/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,387 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ZEN/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,387 - backend.screener.exchange - ERROR - Error watching ticker CHZ/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,387 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for CHZ/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,387 - backend.screener.exchange - ERROR - Error watching ticker BERA/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,387 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for BERA/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,388 - backend.screener.exchange - ERROR - Error watching ticker GUN/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,388 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for GUN/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,388 - backend.screener.exchange - ERROR - Error watching ticker MET/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,388 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for MET/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,388 - backend.screener.exchange - ERROR - Error watching ticker BEAT/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,389 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for BEAT/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,389 - backend.screener.exchange - ERROR - Error watching ticker FOGO/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,389 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for FOGO/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,389 - backend.screener.exchange - ERROR - Error watching ticker VIRTUAL/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,389 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for VIRTUAL/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,389 - backend.screener.exchange - ERROR - Error watching ticker NEAR/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,389 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for NEAR/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,390 - backend.screener.exchange - ERROR - Error watching ticker WLFI/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,390 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for WLFI/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,390 - backend.screener.exchange - ERROR - Error watching ticker PIPPIN/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,390 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for PIPPIN/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,390 - backend.screener.exchange - ERROR - Error watching ticker 1000PEPE/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,390 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for 1000PEPE/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,390 - backend.screener.exchange - ERROR - Error watching ticker PAXG/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,391 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for PAXG/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,391 - backend.screener.exchange - ERROR - Error watching ticker INJ/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,391 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for INJ/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,391 - backend.screener.exchange - ERROR - Error watching ticker BREV/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,391 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for BREV/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,391 - backend.screener.exchange - ERROR - Error watching ticker XAI/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,392 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for XAI/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,392 - backend.screener.exchange - ERROR - Error watching ticker WIF/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,392 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for WIF/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,392 - backend.screener.exchange - ERROR - Error watching ticker XLM/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,392 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for XLM/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,392 - backend.screener.exchange - ERROR - Error watching ticker FARTCOIN/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,392 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for FARTCOIN/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,392 - backend.screener.exchange - ERROR - Error watching ticker WHITEWHALE/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,393 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for WHITEWHALE/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,393 - backend.screener.exchange - ERROR - Error watching ticker GALA/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,393 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for GALA/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,393 - backend.screener.exchange - ERROR - Error watching ticker DOGE/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,393 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for DOGE/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,393 - backend.screener.exchange - ERROR - Error watching ticker ADA/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,393 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ADA/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,393 - backend.screener.exchange - ERROR - Error watching ticker APT/USDT:USDT (futures): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,393 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for APT/USDT:USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,597 - backend.screener.exchange - ERROR - Error watching ticker FIL/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,597 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for FIL/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,597 - backend.screener.exchange - ERROR - Error watching ticker LTC/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,597 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for LTC/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,598 - backend.screener.exchange - ERROR - Error watching ticker SUI/USDC (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,598 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for SUI/USDC. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,598 - backend.screener.exchange - ERROR - Error watching ticker XPL/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,598 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for XPL/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,598 - backend.screener.exchange - ERROR - Error watching ticker ENA/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,598 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ENA/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,598 - backend.screener.exchange - ERROR - Error watching ticker ICNT/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,598 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ICNT/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,599 - backend.screener.exchange - ERROR - Error watching ticker AAVE/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,599 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for AAVE/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,599 - backend.screener.exchange - ERROR - Error watching ticker TON/USDC (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,599 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for TON/USDC. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,599 - backend.screener.exchange - ERROR - Error watching ticker XRP/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,599 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for XRP/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,599 - backend.screener.exchange - ERROR - Error watching ticker CC/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,599 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for CC/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,599 - backend.screener.exchange - ERROR - Error watching ticker RENDER/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,599 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for RENDER/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,600 - backend.screener.exchange - ERROR - Error watching ticker XLM/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,600 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for XLM/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,600 - backend.screener.exchange - ERROR - Error watching ticker POPCAT/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,600 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for POPCAT/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,600 - backend.screener.exchange - ERROR - Error watching ticker WHITEWHALE/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,600 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for WHITEWHALE/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,600 - backend.screener.exchange - ERROR - Error watching ticker USDC/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,600 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for USDC/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,600 - backend.screener.exchange - ERROR - Error watching ticker MON/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,600 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for MON/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,600 - backend.screener.exchange - ERROR - Error watching ticker LINK/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,601 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for LINK/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,601 - backend.screener.exchange - ERROR - Error watching ticker BTC/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,601 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for BTC/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,601 - backend.screener.exchange - ERROR - Error watching ticker MNT/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,601 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for MNT/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,601 - backend.screener.exchange - ERROR - Error watching ticker BONK/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,601 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for BONK/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,601 - backend.screener.exchange - ERROR - Error watching ticker SUI/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,601 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for SUI/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,602 - backend.screener.exchange - ERROR - Error watching ticker STABLE/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,602 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for STABLE/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,602 - backend.screener.exchange - ERROR - Error watching ticker HYPE/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,602 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for HYPE/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,602 - backend.screener.exchange - ERROR - Error watching ticker ES/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,602 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ES/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,602 - backend.screener.exchange - ERROR - Error watching ticker BREV/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,602 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for BREV/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,602 - backend.screener.exchange - ERROR - Error watching ticker XRP/USDC (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,602 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for XRP/USDC. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,602 - backend.screener.exchange - ERROR - Error watching ticker TON/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,603 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for TON/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,603 - backend.screener.exchange - ERROR - Error watching ticker WLD/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,603 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for WLD/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,603 - backend.screener.exchange - ERROR - Error watching ticker SNX/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,603 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for SNX/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,603 - backend.screener.exchange - ERROR - Error watching ticker SOL/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,603 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for SOL/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,603 - backend.screener.exchange - ERROR - Error watching ticker BTC/USDC (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,603 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for BTC/USDC. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,603 - backend.screener.exchange - ERROR - Error watching ticker BARD/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,603 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for BARD/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,604 - backend.screener.exchange - ERROR - Error watching ticker PIEVERSE/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,604 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for PIEVERSE/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,604 - backend.screener.exchange - ERROR - Error watching ticker ZEREBRO/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,604 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ZEREBRO/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,604 - backend.screener.exchange - ERROR - Error watching ticker NIGHT/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,604 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for NIGHT/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,604 - backend.screener.exchange - ERROR - Error watching ticker ATH/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,604 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ATH/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,604 - backend.screener.exchange - ERROR - Error watching ticker VIRTUAL/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,604 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for VIRTUAL/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,605 - backend.screener.exchange - ERROR - Error watching ticker SKATE/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,605 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for SKATE/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,605 - backend.screener.exchange - ERROR - Error watching ticker IP/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,605 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for IP/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,605 - backend.screener.exchange - ERROR - Error watching ticker USDT/TRY (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,605 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for USDT/TRY. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,605 - backend.screener.exchange - ERROR - Error watching ticker DEEP/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,605 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for DEEP/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,605 - backend.screener.exchange - ERROR - Error watching ticker APEX/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,605 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for APEX/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,606 - backend.screener.exchange - ERROR - Error watching ticker ETH/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,606 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ETH/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,606 - backend.screener.exchange - ERROR - Error watching ticker STETH/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,606 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for STETH/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,606 - backend.screener.exchange - ERROR - Error watching ticker SAFE/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,606 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for SAFE/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,606 - backend.screener.exchange - ERROR - Error watching ticker CHZ/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,606 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for CHZ/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,607 - backend.screener.exchange - ERROR - Error watching ticker KAS/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,607 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for KAS/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,607 - backend.screener.exchange - ERROR - Error watching ticker ORDI/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,607 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ORDI/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,607 - backend.screener.exchange - ERROR - Error watching ticker USDT/BRL (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,607 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for USDT/BRL. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,607 - backend.screener.exchange - ERROR - Error watching ticker AVAX/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,607 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for AVAX/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,608 - backend.screener.exchange - ERROR - Error watching ticker LIT/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,608 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for LIT/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,608 - backend.screener.exchange - ERROR - Error watching ticker TRUMP/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,608 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for TRUMP/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,608 - backend.screener.exchange - ERROR - Error watching ticker UNI/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,608 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for UNI/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,608 - backend.screener.exchange - ERROR - Error watching ticker USDE/USDC (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,608 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for USDE/USDC. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,609 - backend.screener.exchange - ERROR - Error watching ticker AXS/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,609 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for AXS/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,609 - backend.screener.exchange - ERROR - Error watching ticker ONDO/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,609 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ONDO/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,609 - backend.screener.exchange - ERROR - Error watching ticker SHIB/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,609 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for SHIB/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,609 - backend.screener.exchange - ERROR - Error watching ticker OP/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,609 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for OP/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,609 - backend.screener.exchange - ERROR - Error watching ticker PEPE/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,609 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for PEPE/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,609 - backend.screener.exchange - ERROR - Error watching ticker DOGE/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,609 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for DOGE/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,610 - backend.screener.exchange - ERROR - Error watching ticker H/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,610 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for H/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,610 - backend.screener.exchange - ERROR - Error watching ticker XAUT/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,610 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for XAUT/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,610 - backend.screener.exchange - ERROR - Error watching ticker SOL/USDC (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,610 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for SOL/USDC. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,611 - backend.screener.exchange - ERROR - Error watching ticker BERA/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,611 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for BERA/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,611 - backend.screener.exchange - ERROR - Error watching ticker POL/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,611 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for POL/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,611 - backend.screener.exchange - ERROR - Error watching ticker FHE/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,611 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for FHE/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,611 - backend.screener.exchange - ERROR - Error watching ticker MET/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,611 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for MET/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,611 - backend.screener.exchange - ERROR - Error watching ticker A/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,611 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for A/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,612 - backend.screener.exchange - ERROR - Error watching ticker DRIFT/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,612 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for DRIFT/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,612 - backend.screener.exchange - ERROR - Error watching ticker BNB/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,612 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for BNB/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,612 - backend.screener.exchange - ERROR - Error watching ticker ADA/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,612 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ADA/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,612 - backend.screener.exchange - ERROR - Error watching ticker DOT/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,612 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for DOT/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,612 - backend.screener.exchange - ERROR - Error watching ticker PUMP/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,613 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for PUMP/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,613 - backend.screener.exchange - ERROR - Error watching ticker SEI/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,613 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for SEI/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,613 - backend.screener.exchange - ERROR - Error watching ticker NEAR/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,613 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for NEAR/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,613 - backend.screener.exchange - ERROR - Error watching ticker LINEA/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,613 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for LINEA/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,613 - backend.screener.exchange - ERROR - Error watching ticker ADA/USDC (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,613 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ADA/USDC. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,613 - backend.screener.exchange - ERROR - Error watching ticker LITKEY/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,614 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for LITKEY/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,614 - backend.screener.exchange - ERROR - Error watching ticker XAI/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,614 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for XAI/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,614 - backend.screener.exchange - ERROR - Error watching ticker CRV/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,614 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for CRV/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,614 - backend.screener.exchange - ERROR - Error watching ticker SPX/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,614 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for SPX/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,614 - backend.screener.exchange - ERROR - Error watching ticker WET/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,614 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for WET/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,615 - backend.screener.exchange - ERROR - Error watching ticker ARB/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,615 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ARB/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,615 - backend.screener.exchange - ERROR - Error watching ticker ICP/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,615 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ICP/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,615 - backend.screener.exchange - ERROR - Error watching ticker STRK/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,615 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for STRK/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,615 - backend.screener.exchange - ERROR - Error watching ticker USDT/PLN (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,615 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for USDT/PLN. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,615 - backend.screener.exchange - ERROR - Error watching ticker ASTER/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,615 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ASTER/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,616 - backend.screener.exchange - ERROR - Error watching ticker HBAR/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,616 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for HBAR/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,616 - backend.screener.exchange - ERROR - Error watching ticker PENGU/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,616 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for PENGU/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,616 - backend.screener.exchange - ERROR - Error watching ticker ZIG/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,616 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ZIG/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,616 - backend.screener.exchange - ERROR - Error watching ticker FRAX/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,616 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for FRAX/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,616 - backend.screener.exchange - ERROR - Error watching ticker APT/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,616 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for APT/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,617 - backend.screener.exchange - ERROR - Error watching ticker TIA/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,617 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for TIA/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,617 - backend.screener.exchange - ERROR - Error watching ticker ETH/USDC (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,617 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ETH/USDC. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,617 - backend.screener.exchange - ERROR - Error watching ticker ZEN/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,617 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for ZEN/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,617 - backend.screener.exchange - ERROR - Error watching ticker BDXN/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,617 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for BDXN/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,617 - backend.screener.exchange - ERROR - Error watching ticker USDE/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,617 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for USDE/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,618 - backend.screener.exchange - ERROR - Error watching ticker FOGO/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,618 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for FOGO/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,618 - backend.screener.exchange - ERROR - Error watching ticker BCH/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,618 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for BCH/USDT. Stopping watch.
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,618 - backend.screener.exchange - ERROR - Error watching ticker TRX/USDT (spot): 'aiohttp._websocket.reader_c.WebSocketReader' object has no attribute 'parse_frame'
+crypto_screener_backend_ws  | 2026-01-16 19:55:53,618 - backend.screener.websocket_manager - ERROR - ❌ Max retries reached for TRX/USDT. Stopping watch.
+crypto_screener_backend_ws  | INFO:     127.0.0.1:33374 - "GET /health HTTP/1.1" 200 OK
+crypto_screener_backend_ws  | 2026-01-16 19:56:10,143 - backend.screener.websocket_manager - INFO - 🔔 Candle closed: 2026-01-16 19:55:00. Processing...

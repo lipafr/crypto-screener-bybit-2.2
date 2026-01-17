@@ -59,11 +59,14 @@ async def check_all_filters_for_symbol(
         # Check each filter
         for filter_obj in filters:
             try:
+                # Extract market from config
+                market = filter_obj['config'].get('market', 'spot')
+                
                 # Check cooldown
                 in_cooldown = await _check_cooldown(
                     filter_id=filter_obj['id'],
                     symbol=symbol,
-                    market=filter_obj['market'],
+                    market=market,
                     cooldown_minutes=15,
                     db=db
                 )
@@ -80,7 +83,7 @@ async def check_all_filters_for_symbol(
                 if filter_obj['type'] == 'price_change':
                     result = await check_price_change_filter(
                         symbol=symbol,
-                        market=filter_obj['market'],
+                        market=market,
                         filter_config=filter_obj['config'],
                         filter_name=filter_obj['name'],
                         db=db
@@ -89,7 +92,7 @@ async def check_all_filters_for_symbol(
                 elif filter_obj['type'] == 'volume_spike':
                     result = await check_volume_spike_filter(
                         symbol=symbol,
-                        market=filter_obj['market'],
+                        market=market,
                         filter_config=filter_obj['config'],
                         filter_name=filter_obj['name'],
                         db=db
@@ -101,7 +104,7 @@ async def check_all_filters_for_symbol(
                         'filter_id': filter_obj['id'],
                         'filter_name': filter_obj['name'],
                         'symbol': symbol,
-                        'market': filter_obj['market'],
+                        'market': market,
                         'data': result,
                         'timestamp': closed_minute
                     }
@@ -384,7 +387,7 @@ async def _get_active_filters_for_symbol(symbol: str, db: Database) -> List[Dict
     """
     result = await db.execute(
         """
-        SELECT id, name, type, market, config, enabled
+        SELECT id, name, type, config, enabled
         FROM filters
         WHERE enabled = 1
         """
@@ -433,7 +436,7 @@ async def _check_cooldown(
         filter_id=filter_id,
         symbol=symbol,
         market=market,
-        minutes=cooldown_minutes
+        cooldown_minutes=cooldown_minutes
     )
 
 

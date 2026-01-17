@@ -22,6 +22,7 @@ KEY CHANGES FROM REST VERSION:
 import asyncio
 import logging
 import signal
+import os
 from typing import Optional, Set, Dict
 
 from .websocket_manager import WebSocketManager, create_websocket_manager
@@ -209,6 +210,11 @@ class ScreenerEngine:
             symbols = set()
             markets = {}
             
+            # Get configurable limit from environment
+            # 0 = no limit (all symbols)
+            max_symbols = int(os.getenv('MAX_SYMBOLS_PER_MARKET', '100'))
+            limit = None if max_symbols == 0 else max_symbols
+            
             # Extract symbols from filter configurations
             for filter_data in filters:
                 market = filter_data.get('config', {}).get('market', 'spot')
@@ -216,7 +222,7 @@ class ScreenerEngine:
                 # Get all symbols for this market from database
                 # (Assumes symbols are already in tickers table from previous runs)
                 # For first run, we'll use top symbols by volume
-                market_symbols = await self._get_symbols_for_market(market, limit=100)
+                market_symbols = await self._get_symbols_for_market(market, limit=limit)
                 
                 for symbol in market_symbols:
                     symbols.add(symbol)
@@ -232,13 +238,13 @@ class ScreenerEngine:
             logger.error(f"Error getting active symbols: {e}", exc_info=True)
             return set(), {}
     
-    async def _get_symbols_for_market(self, market: str, limit: int = 100) -> list:
+    async def _get_symbols_for_market(self, market: str, limit: Optional[int] = 100) -> list:
         """
         Get top symbols for market by volume.
         
         Args:
             market: 'spot' or 'futures'
-            limit: Max number of symbols
+            limit: Max number of symbols (None = all symbols)
         
         Returns:
             List of symbols
@@ -258,10 +264,13 @@ class ScreenerEngine:
                 reverse=True
             )
             
-            # Take top N
-            top_symbols = [symbol for symbol, _ in sorted_symbols[:limit]]
-            
-            logger.info(f"📊 Selected top {len(top_symbols)} {market} symbols by volume")
+            # Apply limit if specified
+            if limit is not None:
+                top_symbols = [symbol for symbol, _ in sorted_symbols[:limit]]
+                logger.info(f"📊 Selected top {len(top_symbols)} {market} symbols by volume")
+            else:
+                top_symbols = [symbol for symbol, _ in sorted_symbols]
+                logger.info(f"📊 Selected ALL {len(top_symbols)} {market} symbols")
             
             return top_symbols
             
