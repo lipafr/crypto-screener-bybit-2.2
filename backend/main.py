@@ -172,13 +172,14 @@ async def get_status():
 # ============================================
 
 # Import API routers
-from .api import filters, triggers, settings as settings_api, websocket
+from .api import filters, triggers, settings as settings_api, websocket, candles
 
 # Include routers (routers already have their own prefixes!)
 app.include_router(filters.router)
 app.include_router(triggers.router)
 app.include_router(settings_api.router)
 app.include_router(websocket.router)
+app.include_router(candles.router)  # <-- Добавьте эту строку
 
 
 logger.info("✅ API application initialized")
