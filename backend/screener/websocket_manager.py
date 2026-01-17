@@ -139,15 +139,18 @@ class WebSocketManager:
             
             logger.info(f"📊 Spot: {len(spot_symbols)}, Futures: {len(futures_symbols)}")
             
-            # STEP 1: Fill initial gaps AND start WebSocket incrementally
-            logger.info("📥 Filling initial historical data (last 2 hours)...")
-            await self._fill_gaps_and_start_websockets(spot_symbols, futures_symbols)
-            
-            # Start scheduler task
+            # Start scheduler task FIRST (parallel with gap filling)
+            logger.info("🕐 Starting candle close scheduler...")
             scheduler_task = asyncio.create_task(self._candle_close_scheduler())
             
-            # Wait for scheduler (runs forever)
-            await scheduler_task
+            # STEP 1: Fill initial gaps AND start WebSocket incrementally
+            logger.info("📥 Filling initial historical data (last 2 hours)...")
+            gap_fill_task = asyncio.create_task(
+                self._fill_gaps_and_start_websockets(spot_symbols, futures_symbols)
+            )
+            
+            # Wait for both tasks (runs forever)
+            await asyncio.gather(scheduler_task, gap_fill_task)
             
         except asyncio.CancelledError:
             logger.info("WebSocket manager cancelled")
@@ -480,6 +483,51 @@ class WebSocketManager:
                             candle['close'],
                             candle.get('volume', 0)
                         )
+                        
+                        # ============================================
+                        # NEW: Update cache and broadcast via WebSocket
+                        # ============================================
+                        logger.info(f"🔄 About to update cache for {symbol}...")
+                        try:
+                            from . import cache
+                            from backend.api.websocket_charts import chart_manager
+                            
+                            logger.info(f"📦 Updating cache for {symbol}...")
+                            # Update cache
+                            cache.update_candle(
+                                symbol=symbol,
+                                market=builder.market,
+                                candle={
+                                    'timestamp': candle['timestamp'],
+                                    'open': candle['open'],
+                                    'high': candle['high'],
+                                    'low': candle['low'],
+                                    'close': candle['close'],
+                                    'volume': candle.get('volume', 0)
+                                }
+                            )
+                            
+                            logger.info(f"📡 Broadcasting via WebSocket for {symbol}...")
+                            # Broadcast via charts WebSocket
+                            await chart_manager.broadcast_candle_update(
+                                symbol,  # позиционный аргумент
+                                builder.market,  # позиционный аргумент  
+                                {  # позиционный аргумент
+                                    'timestamp': candle['timestamp'],
+                                    'open': candle['open'],
+                                    'high': candle['high'],
+                                    'low': candle['low'],
+                                    'close': candle['close'],
+                                    'volume': candle.get('volume', 0)
+                                }
+                            )
+                            
+                            logger.info(f"✅ Cache & WebSocket updated for {symbol}")
+                        except Exception as cache_error:
+                            logger.error(f"❌ Error updating cache/WS for {symbol}: {cache_error}", exc_info=True)
+                        # ============================================
+                        # END NEW CODE
+                        # ============================================
                         
                         symbols_to_check.append((symbol, builder.market))
                         candles_saved += 1

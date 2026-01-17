@@ -1,6 +1,6 @@
 """
-Filters Module (WebSocket Mode)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Filters Module (WebSocket Mode) - WITH CHARTS SUPPORT
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Filter checking logic adapted for WebSocket candle-based triggers.
 
@@ -8,14 +8,23 @@ KEY CHANGES:
 - check_all_filters_for_symbol() - checks filters on candle close
 - Uses only CLOSED candles from database
 - Called by WebSocket manager at XX:XX:10 after candle finalization
+
+CHARTS INTEGRATION:
+- Adds trigger marks to cache on filter hits
+- Broadcasts trigger marks via charts WebSocket
 """
 
 import logging
 import json
+import time
 from typing import Optional, List, Dict
 
 from .database import Database
 from .time_utils import get_last_closed_candle_timestamp, format_timestamp
+
+# NEW: Import cache and charts WebSocket manager
+from . import cache
+from backend.api.websocket_charts import chart_manager
 
 logger = logging.getLogger(__name__)
 
@@ -113,6 +122,36 @@ async def check_all_filters_for_symbol(
                     
                     # Save to DB
                     await _save_trigger(trigger_data, db)
+                    
+                    # ============================================
+                    # NEW: Add trigger mark to cache
+                    # ============================================
+                    cache.add_trigger_mark(
+                        symbol=symbol,
+                        market=market,
+                        trigger_data={
+                            'timestamp': int(time.time()),
+                            'filter_id': filter_obj['id'],
+                            'filter_name': filter_obj['name'],
+                            'filter_type': filter_obj['type']
+                        }
+                    )
+                    
+                    # ============================================
+                    # NEW: Broadcast trigger mark via charts WebSocket
+                    # ============================================
+                    await chart_manager.broadcast_trigger_mark(
+                        symbol=symbol,
+                        market=market,
+                        trigger_data={
+                            'timestamp': int(time.time()),
+                            'filter_name': filter_obj['name'],
+                            'filter_type': filter_obj['type']
+                        }
+                    )
+                    # ============================================
+                    # END NEW CODE
+                    # ============================================
                     
                     # Send Telegram notification
                     await _send_telegram_alert(trigger_data)

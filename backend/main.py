@@ -1,8 +1,8 @@
 """
-FastAPI Main Application (WebSocket Version) - WITH STATUS ENDPOINT
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FastAPI Main Application - WITH CHARTS SUPPORT
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Main entry point for WebSocket-based crypto screener.
+Main entry point for crypto screener with charts functionality.
 """
 
 import logging
@@ -10,9 +10,11 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
-from .config import settings
-from .screener.engine import start_screener, get_engine
+from backend.config import settings
+from backend.screener.engine import start_screener, get_engine
+from backend.screener import cache
 
 # Setup logging
 logging.basicConfig(
@@ -31,15 +33,17 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """
     Lifespan context manager for startup/shutdown events.
-    
-    This starts the WebSocket screener engine on startup.
     """
     logger.info("=" * 70)
-    logger.info("🚀 STARTING CRYPTO SCREENER API (WEBSOCKET MODE)")
+    logger.info("🚀 STARTING CRYPTO SCREENER API")
     logger.info("=" * 70)
     
+    # Initialize cache
+    cache.init_cache()
+    logger.info("✅ Cache initialized")
+    
     # Initialize database for API endpoints
-    from .screener.database import Database
+    from backend.screener.database import Database
     app.state.db = Database(settings.db_path)
     await app.state.db.connect()
     logger.info("✅ API database connection initialized")
@@ -92,8 +96,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Crypto Screener API",
-    description="Real-time cryptocurrency screening with WebSocket",
-    version="2.0.0",
+    description="Real-time cryptocurrency screening with charts",
+    version="2.1.0",
     lifespan=lifespan
 )
 
@@ -105,6 +109,35 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ============================================
+# Include Routers
+# ============================================
+
+# FIXED: Import settings API router with alias to avoid conflict
+from backend.api import filters, triggers
+from backend.api import settings as settings_api  # ← RENAMED!
+from backend.api import charts  # NEW
+from backend.api.websocket import router as websocket_router
+from backend.api.websocket_charts import websocket_chart_endpoint, chart_manager  # NEW
+
+# Existing routers
+app.include_router(filters.router)
+app.include_router(triggers.router)
+app.include_router(settings_api.router)  # ← Using alias
+app.include_router(websocket_router)
+
+# NEW: Charts router
+app.include_router(charts.router)
+
+# NEW: Charts WebSocket endpoint
+from fastapi import WebSocket
+
+@app.websocket("/ws/charts")
+async def websocket_charts(websocket: WebSocket):
+    """WebSocket endpoint for real-time chart updates."""
+    await websocket_chart_endpoint(websocket)
 
 
 # ============================================
@@ -121,8 +154,8 @@ async def health_check():
     """
     return {
         "status": "healthy",
-        "version": "2.0.0",
-        "mode": "websocket"
+        "version": "2.1.0",
+        "features": ["filters", "triggers", "charts", "websocket"]
     }
 
 
@@ -136,15 +169,16 @@ async def root():
     """
     return {
         "name": "Crypto Screener API",
-        "version": "2.0.0",
-        "mode": "WebSocket",
+        "version": "2.1.0",
+        "features": ["filters", "triggers", "charts", "websocket"],
         "docs": "/docs",
-        "health": "/health"
+        "health": "/health",
+        "charts": "/charts.html"
     }
 
 
 # ============================================
-# Status Endpoint (for frontend)
+# Status Endpoint
 # ============================================
 
 @app.get("/api/status")
@@ -155,47 +189,37 @@ async def get_status():
     Returns:
         System status information
     """
-    engine = get_engine()
+    import time
     
-    return {
-        "status": "running" if engine and engine.running else "stopped",
-        "mode": "websocket",
-        "version": "2.0.0",
-        "running": engine.running if engine else False,
-        "active_filters": 0,  # TODO: Get from database
-        "last_check": None,  # TODO: Get from database
+    status = {
+        "api_status": "online",
+        "engine_status": "unknown",
+        "cache_stats": cache.get_cache_stats(),
+        "timestamp": int(time.time())
     }
-
-
-# ============================================
-# Import and Include API Routers
-# ============================================
-
-# Import API routers
-from .api import filters, triggers, settings as settings_api, websocket, candles
-
-# Include routers (routers already have their own prefixes!)
-app.include_router(filters.router)
-app.include_router(triggers.router)
-app.include_router(settings_api.router)
-app.include_router(websocket.router)
-app.include_router(candles.router)  # <-- Добавьте эту строку
-
-
-logger.info("✅ API application initialized")
-
-
-# ============================================
-# Main Entry Point (for development)
-# ============================================
-
-if __name__ == "__main__":
-    import uvicorn
     
-    uvicorn.run(
-        "backend.main:app",
-        host=settings.api_host,
-        port=settings.api_port,
-        reload=True,
-        log_level=settings.log_level.lower()
-    )
+    # Check engine status
+    engine = get_engine()
+    if engine:
+        status["engine_status"] = "running"
+        if hasattr(engine, 'last_parse_time'):
+            time_since_parse = int(time.time()) - engine.last_parse_time
+            status["seconds_since_last_parse"] = time_since_parse
+            
+            # Считаем данные устаревшими если не обновлялись > 5 минут
+            if time_since_parse > 300:
+                status["data_status"] = "stale"
+            else:
+                status["data_status"] = "live"
+    else:
+        status["engine_status"] = "not_running"
+        status["data_status"] = "offline"
+    
+    return status
+
+
+# ============================================
+# Store chart_manager reference
+# ============================================
+
+app.state.chart_manager = chart_manager
